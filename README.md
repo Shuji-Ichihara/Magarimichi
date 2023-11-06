@@ -1,4 +1,4 @@
-# Magarimiti
+# Magarimichi
 ゲームハッカソン後期１回目　曲道
 
 ## チームメンバー
