@@ -9,13 +9,13 @@
 /[Bb]uilds/
 /[Ll]ogs/
 /[Uu]ser[Ss]ettings/
-Magarimiti/[Ll]ibrary/
-Magarimiti/[Tt]emp/
-Magarimiti/[Oo]bj/
-Magarimiti/[Bb]uild/
-Magarimiti/[Bb]uilds/
-Magarimiti/[Ll]ogs/
-Magarimiti/[Uu]ser[Ss]ettings/
+Magarimichi/[Ll]ibrary/
+Magarimichi/[Tt]emp/
+Magarimichi/[Oo]bj/
+Magarimichi/[Bb]uild/
+Magarimichi/[Bb]uilds/
+Magarimichi/[Ll]ogs/
+Magarimichi/[Uu]ser[Ss]ettings/
 
 # MemoryCaptures can get excessive in size.
 # They also could contain extremely sensitive data
@@ -77,4 +77,4 @@ crashlytics-build.properties
 # Temporary auto-generated Android Assets
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
-Magarimiti/.vsconfig
+Magarimichi/.vsconfig
