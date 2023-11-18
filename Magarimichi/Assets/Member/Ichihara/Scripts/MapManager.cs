@@ -85,6 +85,7 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
             }
         }
         //_mapChipController.SetMapChipSprite();
+        // マップチップを隠す
         SpriteRenderer renderer = _map[(int)hiddenMapChip.x, (int)hiddenMapChip.y].GetComponent<SpriteRenderer>();
         renderer.enabled = false;
     }
@@ -97,7 +98,7 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
         // 鍵が生成されるマップチップの座標
         Vector2 keySpawnPosition = new Vector2(
             Random.Range(1, (int)_mapWidthAndHeight.x - 1), Random.Range(1, (int)_mapWidthAndHeight.y - 1));
-        Debug.Log($"width = {keySpawnPosition.x} height = {keySpawnPosition.y}");
+        //Debug.Log($"width = {keySpawnPosition.x} height = {keySpawnPosition.y}");
         // 錠前が生成されるマップチップの座標
         Vector2 lockSpawnPosition = new Vector2(_mapWidthAndHeight.x - 1, _mapWidthAndHeight.y - 2);
         // 生成
