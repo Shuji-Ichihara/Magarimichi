@@ -255,4 +255,4 @@ MonoBehaviour:
   _key: {fileID: 6185063958907375800, guid: 63d1c793acf5b4146a6720332e9f079f, type: 3}
   _lock: {fileID: 4970301201484273161, guid: 0c3352b5c61c8dd4e8ee2963f14fc046, type: 3}
   _mapChipSprites: []
-  _mapWidthAndHeight: {x: 5, y: 5}
+  _mapWidthAndHeight: {x: 5, y: 7}
