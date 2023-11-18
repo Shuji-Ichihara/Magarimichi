@@ -252,5 +252,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _mapChipController: {fileID: 0}
-  _mapWidthAndHeight: {x: 99, y: 88}
+  _key: {fileID: 0}
+  _lock: {fileID: 0}
   _mapChipSprites: []
+  _mapWidthAndHeight: {x: 5, y: 5}
