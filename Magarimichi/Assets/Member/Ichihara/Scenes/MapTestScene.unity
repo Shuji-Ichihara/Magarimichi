@@ -251,8 +251,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e5eae2e3b3a30594ba57078bee859d0c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _mapChipController: {fileID: 0}
-  _key: {fileID: 0}
-  _lock: {fileID: 0}
+  _mapChipController: {fileID: 412897492079031886, guid: 1321e36bf0277454caf10c095a4172a4, type: 3}
+  _key: {fileID: 6185063958907375800, guid: 63d1c793acf5b4146a6720332e9f079f, type: 3}
+  _lock: {fileID: 4970301201484273161, guid: 0c3352b5c61c8dd4e8ee2963f14fc046, type: 3}
   _mapChipSprites: []
   _mapWidthAndHeight: {x: 5, y: 5}
