@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class MapManager : SingletonMonoBehaviour<MapManager>
 {
@@ -93,7 +94,10 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
     /// </summary>
     private void GenerateObject()
     {
-        Vector2 keySpawnPosition = new Vector2(2, 1);
+        // 鍵が生成されるマップチップの座標
+        Vector2 keySpawnPosition = new Vector2(
+            Random.Range(1, (int)_mapWidthAndHeight.y - 1), Random.Range(1, (int)_mapWidthAndHeight.x - 1));
+        // 錠前が生成されるマップチップの座標
         Vector2 lockSpawnPosition = new Vector2(_mapWidthAndHeight.y - 1, _mapWidthAndHeight.x - 2);
         _key = Instantiate(_key, _map[(int)keySpawnPosition.y, (int)keySpawnPosition.x].transform.position, Quaternion.identity);
         _lock = Instantiate(_lock, _map[(int)lockSpawnPosition.y, (int)lockSpawnPosition.x].transform.position, Quaternion.identity);
@@ -107,6 +111,7 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
     /// <returns>マップチップの情報</returns>
     public GameObject GetMapChipData(int height, int width)
     {
+        // 配列外参照を防ぐ
         if (height >= _mapWidthAndHeight.y || width >= _mapWidthAndHeight.x)
         {
             Debug.LogError($"{_map[height, width]}の情報が取得できません。");
