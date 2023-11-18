@@ -94,7 +94,7 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
     private void GenerateObject()
     {
         Vector2 keySpawnPosition = new Vector2(2, 1);
-        Vector2 lockSpawnPosition = new Vector2(4, 3);
+        Vector2 lockSpawnPosition = new Vector2(_mapWidthAndHeight.y - 1, _mapWidthAndHeight.x - 2);
         _key = Instantiate(_key, _map[(int)keySpawnPosition.y, (int)keySpawnPosition.x].transform.position, Quaternion.identity);
         _lock = Instantiate(_lock, _map[(int)lockSpawnPosition.y, (int)lockSpawnPosition.x].transform.position, Quaternion.identity);
     }
