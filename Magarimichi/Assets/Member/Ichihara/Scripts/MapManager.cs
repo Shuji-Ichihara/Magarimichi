@@ -25,7 +25,7 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
     #endregion
 
     // マップチップ配列
-    // 配列のイメージは、[縦のマップチップ, 横のマップチップ]でお願いします。
+    // 配列のイメージは、[横のマップチップ, 縦のマップチップ]でお願いします。
     private GameObject[,] _map = { };
 
     new private void Awake()
@@ -59,7 +59,7 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
     {
         int half = 2;
         // 欠けさせるマップチップの座標
-        Vector2 hiddenMapChip = new Vector2(0, _mapWidthAndHeight.y - 1);
+        Vector2 hiddenMapChip = new Vector2(_mapWidthAndHeight.y - 1, 0);
         // _map[0,0] の座標
         Vector3 mapChipPosition = new Vector3(
             -(_mapChipController.transform.localScale.x * _mapWidthAndHeight.x / half) + _mapChipController.transform.localScale.x / half
@@ -85,7 +85,7 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
             }
         }
         //_mapChipController.SetMapChipSprite();
-        SpriteRenderer renderer = _map[(int)hiddenMapChip.y, (int)hiddenMapChip.x].GetComponent<SpriteRenderer>();
+        SpriteRenderer renderer = _map[(int)hiddenMapChip.x, (int)hiddenMapChip.y].GetComponent<SpriteRenderer>();
         renderer.enabled = false;
     }
 
@@ -96,9 +96,11 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
     {
         // 鍵が生成されるマップチップの座標
         Vector2 keySpawnPosition = new Vector2(
-            Random.Range(1, (int)_mapWidthAndHeight.y - 1), Random.Range(1, (int)_mapWidthAndHeight.x - 1));
+            Random.Range(1, (int)_mapWidthAndHeight.x - 1), Random.Range(1, (int)_mapWidthAndHeight.y - 1));
+        Debug.Log($"width = {keySpawnPosition.x} height = {keySpawnPosition.y}");
         // 錠前が生成されるマップチップの座標
-        Vector2 lockSpawnPosition = new Vector2(_mapWidthAndHeight.y - 1, _mapWidthAndHeight.x - 2);
+        Vector2 lockSpawnPosition = new Vector2(_mapWidthAndHeight.x - 1, _mapWidthAndHeight.y - 2);
+        // 生成
         _key = Instantiate(_key, _map[(int)keySpawnPosition.y, (int)keySpawnPosition.x].transform.position, Quaternion.identity);
         _lock = Instantiate(_lock, _map[(int)lockSpawnPosition.y, (int)lockSpawnPosition.x].transform.position, Quaternion.identity);
     }
