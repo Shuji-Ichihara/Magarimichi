@@ -4,6 +4,10 @@ using UnityEngine;
 
 public class Button : MonoBehaviour
 {
+    //呼び出し方の例です。
+    //ゲームクリア時は変わると思いますが、仕組みは大体一緒なので、大丈夫だと思います。
+    //わからなければ、早めの連絡を
+
     GameObject Scene;
 
     public int Noumber;
@@ -21,6 +25,9 @@ public class Button : MonoBehaviour
         Scene = GameObject.FindGameObjectWithTag("ScneManger");
         switch (Noumber)
         {
+            case 0:
+                Scene.GetComponent<SceneManger>()._LoadScene(Name.TitleScene);
+                break;
             case 1:
                 Scene.GetComponent<SceneManger>()._LoadScene(Name.StageSelect);
                 break;
@@ -32,6 +39,9 @@ public class Button : MonoBehaviour
                 break;
             case 4:
                 Scene.GetComponent<SceneManger>()._LoadScene(Name.Main3);
+                break;
+            case 5:
+                Scene.GetComponent<SceneManger>()._LoadScene(Name.ResultScene);
                 break;
         }
     }
