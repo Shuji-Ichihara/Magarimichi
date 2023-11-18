@@ -27,7 +27,10 @@ public class MapChipController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-
+        _renderer = GetComponent<SpriteRenderer>();
+        // 背景である為、一番下に配置されるようにする
+        _renderer.sortingOrder = -99;
+        SetUpMapChipAtrribute();
     }
 
     // Update is called once per frame
@@ -38,7 +41,7 @@ public class MapChipController : MonoBehaviour
 
     private void SetUpMapChipAtrribute()
     {
-        Sprite sprite = _renderer.sprite;
+
     }
 
     public void SetMapChipSprite(Sprite sprite)
