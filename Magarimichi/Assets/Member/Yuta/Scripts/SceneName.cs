@@ -7,9 +7,10 @@ using UnityEngine;
 //‘‚©‚È‚¢‚Æ“®‚©‚È‚¢‚©‚ç‚Ë
 public enum Name
 {
-    Title = 0,
+    TitleScene = 0,
     StageSelect = 1,
     Main1 = 2,
     Main2 = 3,
     Main3 = 4,
+    ResultScene = 5,
 }

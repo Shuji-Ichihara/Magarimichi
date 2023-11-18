@@ -9,6 +9,9 @@ EditorBuildSettings:
     path: Assets/Scenes/SampleScene.unity
     guid: 2cda990e2423bbf4892e6590ba056729
   - enabled: 1
+    path: Assets/Member/Masato/Scenes/TitleScene.unity
+    guid: c21e107030c38f54787f2d959274c632
+  - enabled: 0
     path: Assets/Member/Yuta/Scene/Title.unity
     guid: 05b752388bbe1bb44a41105e3a01133f
   - enabled: 1
@@ -23,4 +26,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Member/Yuta/Scene/Main3.unity
     guid: d52956f421542304798c71488fd6a7d6
+  - enabled: 1
+    path: Assets/Member/Masato/Scenes/ResultScene.unity
+    guid: 45c05f69ec5580a4e985916083c3cbe7
   m_configObjects: {}
