@@ -38,7 +38,7 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
     {
         int half = 2;
         // 欠けさせるマップチップの座標
-        Vector2 hiddenMapChip = new Vector2(0, _mapWidthAndHeight.x - 1);
+        Vector2 hiddenMapChip = new Vector2(0, _mapWidthAndHeight.y - 1);
         // _map[0,0] の座標
         Vector3 mapChipPosition = new Vector3(
             -(_mapChipController.transform.localScale.x * _mapWidthAndHeight.x / half) + _mapChipController.transform.localScale.x / half
