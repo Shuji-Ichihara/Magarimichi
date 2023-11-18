@@ -37,7 +37,8 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
     private void GenerateMap()
     {
         int half = 2;
-        Vector2 hiddenMapChip = new Vector2(3, 0);
+        // 欠けさせるマップチップ
+        Vector2 hiddenMapChip = new Vector2(0, 5);
         // _map[0,0] の座標
         Vector3 mapChipPosition = new Vector3(
             -(_mapChipController.transform.localScale.x * _mapWidthAndHeight.x / half) + _mapChipController.transform.localScale.x / half
@@ -47,7 +48,7 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
             // 一列配置する度に、次に配置するマップチップを 1 個分ずつ下にずらす
             if (heightCOunt != 0)
             {
-                var dummyObj = _map[0, heightCOunt - 1];
+                var dummyObj = _map[heightCOunt - 1, 0];
                 mapChipPosition = new Vector3(
                     dummyObj.transform.position.x
                   , dummyObj.transform.position.y - _mapChipController.transform.localScale.y);
@@ -59,7 +60,7 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
                     mapChipPosition += Vector3.right * _mapChipController.transform.localScale.x;
                 GameObject mapChipObj = Instantiate(_mapChipController.gameObject, mapChipPosition, Quaternion.identity);
                 mapChipObj.transform.SetParent(transform);
-                _map[widthCount, heightCOunt] = mapChipObj;
+                _map[heightCOunt, widthCount] = mapChipObj;
             }
         }
         //_mapChipController.SetMapChipSprite();
