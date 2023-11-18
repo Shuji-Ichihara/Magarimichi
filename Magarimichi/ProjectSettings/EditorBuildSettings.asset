@@ -5,7 +5,22 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/SampleScene.unity
     guid: 2cda990e2423bbf4892e6590ba056729
+  - enabled: 1
+    path: Assets/Member/Yuta/Scene/Title.unity
+    guid: 05b752388bbe1bb44a41105e3a01133f
+  - enabled: 1
+    path: Assets/Member/Yuta/Scene/StageSelect.unity
+    guid: deb62af13105d4641b9b4bb397f79ef2
+  - enabled: 1
+    path: Assets/Member/Yuta/Scene/Main1.unity
+    guid: 9bb25ef1fe249344b8ea365cdd048e3f
+  - enabled: 1
+    path: Assets/Member/Yuta/Scene/Main2.unity
+    guid: 022038fb12a3448409765490aa88632b
+  - enabled: 1
+    path: Assets/Member/Yuta/Scene/Main3.unity
+    guid: d52956f421542304798c71488fd6a7d6
   m_configObjects: {}
