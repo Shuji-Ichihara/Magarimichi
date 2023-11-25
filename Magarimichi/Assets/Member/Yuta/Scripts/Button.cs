@@ -12,10 +12,19 @@ public class Button : MonoBehaviour
 
     public int Noumber;
 
-    public void Test()
+    public void SceneMoving()
     {
         Fade_Controller.IsFadeOut = true;
         StartCoroutine("SceneMove");
+    }
+
+    public void Finish()
+    {
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
+    Application.Quit();
+#endif
     }
 
     IEnumerator SceneMove()
