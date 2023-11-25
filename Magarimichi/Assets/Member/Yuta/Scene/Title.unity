@@ -291,7 +291,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 193129082}
         m_TargetAssemblyTypeName: Button, Assembly-CSharp
-        m_MethodName: Test
+        m_MethodName: SceneMoving
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
