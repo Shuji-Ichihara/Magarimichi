@@ -10,8 +10,10 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
     public MapChip MapChip => _mapChip;
     [SerializeField]
     private MapChip _mapChip = null;
+    // 鍵オブジェクト
     [SerializeField]
     private GameObject _key = null;
+    // 錠前オブジェくト
     [SerializeField]
     private GameObject _lock = null;
     // マップチップに設定するスプライトの配列
@@ -19,15 +21,24 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
     [SerializeField]
     private List<Sprite> _mapChipSprites = new List<Sprite>();
     #endregion
-    #region マップの大きさ
+    #region Map
     // マップの縦横比
+    public Vector2Int MapChipWidthAndHeight => _mapWidthAndHeight;
     [SerializeField]
     private Vector2Int _mapWidthAndHeight = new Vector2Int(4, 4);
-    #endregion
-
     // マップチップ配列
     // 配列のイメージは、[横のマップチップ, 縦のマップチップ]です。
+    public MapChip[,] Map => _map;
     private MapChip[,] _map = { };
+    #endregion
+    #region Others
+    // スワイプの始点と終点
+    Vector3 _swipeStartPosition = Vector3.zero, _swipeEndPosition = Vector3.zero;
+    // 動かすマップチップと移動先のマップチップ
+    MapChip _targetMapChip = null, _destinationMapChip = null;
+    // 空白のマップチップ
+    private MapChip _noneMapChip = null;
+    #endregion
 
     new private void Awake()
     {
@@ -47,10 +58,15 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
             GameObject obj = Resources.Load("Prefabs/Lock") as GameObject;
             _lock = obj;
         }
-        // 配列の大きさを設定
+        // マップ配列の大きさを設定
         _map = new MapChip[_mapWidthAndHeight.y, _mapWidthAndHeight.x];
         GenerateMap();
         GenerateObject();
+    }
+
+    private void Update()
+    {
+        MoveMapChip();
     }
 
     /// <summary>
@@ -81,13 +97,12 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
                 if (widthMapChipCount != 0)
                     mapChipPosition += Vector3.right * _mapChip.transform.localScale.x;
                 GameObject mapChipObj = Instantiate(_mapChip.gameObject, mapChipPosition, Quaternion.identity);
-                mapChipObj.transform.SetParent(transform);
-                _map[heightMapChipCount, widthMapChipCount] = mapChipObj.GetComponent<MapChip>();
+                var mapChip = mapChipObj.GetComponent<MapChip>();
+                mapChip.transform.SetParent(transform);
+                _map[heightMapChipCount, widthMapChipCount] = mapChip;
             }
         }
-        // TODO
-        //_mapChipController.SetMapChipSprite();
-        // マップチップを隠す
+        // 空白のマップチップを作成
         SpriteRenderer renderer = _map[hiddenMapChip.x, hiddenMapChip.y].GetComponent<SpriteRenderer>();
         renderer.enabled = false;
     }
@@ -108,48 +123,122 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
     }
 
     /// <summary>
+    /// マップチップの移動
+    /// </summary>
+    private void MoveMapChip()
+    {
+        int half = 2;
+        // マップチップを動かせるフラグ
+        bool isMoveMapChip = false;
+        if (Input.GetMouseButtonDown(0))
+        {
+            var dummySwipeStartPosition = Input.mousePosition;
+            _swipeStartPosition = Camera.main.ScreenToWorldPoint(dummySwipeStartPosition);
+            // 移動させるマップチップの情報を取得
+            _targetMapChip = GetMapChipData(_swipeStartPosition.x, _swipeStartPosition.y);
+        }
+        if (Input.GetMouseButtonUp(0))
+        {
+            var dummySwipeEndPosition = Input.mousePosition;
+            _swipeEndPosition = Camera.main.ScreenToWorldPoint(dummySwipeEndPosition);
+            // 絶対値に変換
+            float xDirection = Mathf.Abs(GetSwipeDirection(_swipeStartPosition.x, _swipeEndPosition.x));
+            float yDirection = Mathf.Abs(GetSwipeDirection(_swipeStartPosition.y, _swipeEndPosition.y));
+            // スワイプ距離があまりにも短い場合は移動しない
+            if (xDirection <= _mapChip.transform.localScale.x / half
+                && yDirection <= _mapChip.transform.localScale.y / half)
+                return;
+            // 移動先のマップチップの情報を取得
+            _destinationMapChip = GetMapChipData(_swipeEndPosition.x, _swipeEndPosition.y);
+            isMoveMapChip = true;
+        }
+        if (isMoveMapChip == true)
+        {
+            // いずれかのマップチップの情報が null ならば移動しない
+            if (_targetMapChip == null || _destinationMapChip == null)
+                return;
+            // _targetMapChip と NoneMapChip のインデックスを取得
+            var indexNoneMapChip = _map.GetIndex(_noneMapChip);
+            var indexTargetMapChip = _map.GetIndex(_targetMapChip);
+            // 斜めの移動を行わない
+            if ((indexTargetMapChip.x == indexNoneMapChip.x || indexTargetMapChip.y == indexNoneMapChip.y) == false)
+                return;
+            // 空白のマップチップに隣接していない場合は移動しない
+            if ((indexTargetMapChip.x == indexNoneMapChip.x - 1 || indexTargetMapChip.x == indexNoneMapChip.x + 1
+                || indexTargetMapChip.y == indexNoneMapChip.y - 1 || indexTargetMapChip.y == indexNoneMapChip.y + 1) == false)
+                return;
+            // スタート、ゴール、鍵、錠前があるマップチップ、空白のマップチップは移動しない
+            if (_targetMapChip.MapChipAttribute != MapChipAttribute.Use)
+                return;
+            // スライドパズルである為、空白以外には移動しない
+            if (_destinationMapChip.MapChipAttribute != MapChipAttribute.None)
+                return;
+            // マップチップを移動させる
+            ChangeMapChip(ref _targetMapChip, ref _destinationMapChip);
+        }
+    }
+
+    /// <summary>
     /// マップチップを入れ替える
     /// </summary>
     /// <param name="targetMapChip">入れ替えたいマップチップ</param>
     /// <param name="destinationMapChip">入れ替える先のマップチップ</param>
-    public void ChangeMapChip(ref MapChip targetMapChip, ref MapChip destinationMapChip)
+    private void ChangeMapChip(ref MapChip targetMapChip, ref MapChip destinationMapChip)
     {
         Vector3 targetPosition = targetMapChip.transform.position, destinationPosition = destinationMapChip.transform.position;
-        MapChip dummyTargetMapChip = targetMapChip, dummyDestinationMapChip = destinationMapChip, dummyMapChip = null;
-        //var index = _map.GetIndex(dummyTargetMapChip);
-        //Debug.Log(index);
+        MapChip dummyTargetMapChip = targetMapChip, dummyDestinationMapChip = destinationMapChip;
+        //var targetMapChipIndex = _map.GetIndex(targetMapChip);
+        //var destinationMapChipIndex = _map.GetIndex(destinationMapChip);
+        for (int heightMapChipCount = 0; heightMapChipCount < _mapWidthAndHeight.y; heightMapChipCount++)
+        {
+            for (int widthMapChipCount = 0; widthMapChipCount < _mapWidthAndHeight.x; widthMapChipCount++)
+            {
+                // 配列の要素を上書き
+                // これをしないと、インデックスを取得する時におかしな値になる
+                if (_map[widthMapChipCount, heightMapChipCount] == targetMapChip)
+                    _map.SetValue(dummyDestinationMapChip, widthMapChipCount, heightMapChipCount);
+                else if (_map[widthMapChipCount, heightMapChipCount] == destinationMapChip)
+                    _map.SetValue(dummyTargetMapChip, widthMapChipCount, heightMapChipCount);
+            }
+        }
         targetMapChip.transform.position = destinationPosition;
         destinationMapChip.transform.position = targetPosition;
     }
 
+    #region Setter
+    public void SetNoneMapChip(MapChip mapChip)
+    {
+        _noneMapChip = mapChip;
+    }
+    #endregion
     #region Getter
     /// <summary>
-    /// 配列の中のマップチップの情報を添え字から取得
+    /// が魏のデータを取得
     /// </summary>
-    /// <param name="width">マップの行</param>
-    /// <param name="height">マップの列</param>
-    /// <returns>マップチップの情報</returns>
-    public MapChip GetMapChipData(int width, int height)
+    /// <returns>鍵のゲームオブジェクト</returns>
+    public GameObject GetKeyData()
     {
-        // 配列外参照を防ぐ
-        if (width >= _mapWidthAndHeight.x || height >= _mapWidthAndHeight.y)
-        {
-            Debug.LogError($"{_map[width, height].name}の情報が取得できません。");
-            return null;
-        }
-#if UNITY_EDITOR
-        Debug.Log($"今回取得したマップチップは、{_map[width, height].name} です。");
-#endif
-        return _map[width, height];
+        return _key;
     }
 
     /// <summary>
-    /// 配列の中のマップチップの情報を X 座標、Y 座標から取得
+    /// スワイプした距離の長さを取得
     /// </summary>
-    /// <param name="xPosition">指定した X 座標</param>
-    /// <param name="yPosition">指定した Y 座標</param>
+    /// <param name="startValue">スワイプの始点</param>
+    /// <param name="endValue">スワイプの終点</param>
+    /// <returns>始点と終点の距離</returns>
+    private float GetSwipeDirection(in float startValue, in float endValue)
+    {
+        return endValue - startValue;
+    }
+
+    /// <summary>
+    /// 配列の中のマップチップの情報をワールド座標から取得
+    /// </summary>
+    /// <param name="xPosition">指定したマップチップの X 座標</param>
+    /// <param name="yPosition">指定したマップチップの Y 座標</param>
     /// <returns>マップチップの情報</returns>
-    public MapChip GetMapChipData(float xPosition, float yPosition)
+    private MapChip GetMapChipData(float xPosition, float yPosition)
     {
         int half = 2;
         MapChip mapChip = null;
@@ -161,8 +250,6 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
             // 引数の値を比較し、条件に合致するマップチップを特定、代入する
             if (xPosition >= dummyMapChipPosition.x - xScale / half && xPosition <= dummyMapChipPosition.x + xScale / half)
             {
-                Debug.Log($"xPos = {xPosition >= dummyMapChipPosition.x - xScale / half && xPosition <= dummyMapChipPosition.x + xScale / half}, " +
-                    $"yPos = {yPosition >= dummyMapChipPosition.y - yScale / half && yPosition <= dummyMapChipPosition.y + yScale / half}");
                 if (yPosition >= dummyMapChipPosition.y - yScale / half && yPosition <= dummyMapChipPosition.y + yScale / half)
                 {
                     mapChip = dummyMapChip;
@@ -172,11 +259,12 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
         }
         if (mapChip == null)
         {
-            //Debug.LogError($"{new Vector2(xPosition, yPosition)}にあるマップチップの情報を取得できませんでした。");
+            Debug.LogError($"{new Vector2(xPosition, yPosition)}にあるマップチップの情報を取得できませんでした。");
             return null;
         }
 #if UNITY_EDITOR
-        //Debug.Log($"今回取得したマップチップは、{mapChip.name} です。");
+        //Debug.Log($"今回取得したマップチップは、MapChip{_map.GetIndex(mapChip)} です。");
+        Debug.Log($"今回取得したマップチップは、MapChip{mapChip.MapChipAttribute} です。");
 #endif
         return mapChip;
     }
