@@ -263,8 +263,8 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
             return null;
         }
 #if UNITY_EDITOR
-        //Debug.Log($"今回取得したマップチップは、MapChip{_map.GetIndex(mapChip)} です。");
-        Debug.Log($"今回取得したマップチップは、MapChip{mapChip.MapChipAttribute} です。");
+        Debug.Log($"今回取得したマップチップは、MapChip{_map.GetIndex(mapChip)} です。");
+        //Debug.Log($"今回取得したマップチップは、MapChip{mapChip.MapChipAttribute} です。");
 #endif
         return mapChip;
     }
