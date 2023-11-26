@@ -90,6 +90,11 @@ public class MapChip : MonoBehaviour
     {
         _renderer.sprite = sprite;
     }
+
+    public void SetMapChipMaterial(Material material)
+    {
+        _renderer.material = material;
+    }
     #endregion
 
     // 選択している時に、マップチップを光らせる
