@@ -38,6 +38,11 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
     MapChip _targetMapChip = null, _destinationMapChip = null;
     // 空白のマップチップ
     private MapChip _noneMapChip = null;
+    // 選択中のマテリアル
+    [SerializeField]
+    private Material _activeMaterial = null;
+    [SerializeField]
+    private Material _defaultMaterial = null;
     #endregion
 
     new private void Awake()
@@ -136,6 +141,7 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
             _swipeStartPosition = Camera.main.ScreenToWorldPoint(dummySwipeStartPosition);
             // 移動させるマップチップの情報を取得
             _targetMapChip = GetMapChipData(_swipeStartPosition.x, _swipeStartPosition.y);
+            _targetMapChip.SetMapChipMaterial(_activeMaterial);
         }
         if (Input.GetMouseButtonUp(0))
         {
@@ -147,7 +153,10 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
             // スワイプ距離があまりにも短い場合は移動しない
             if (xDirection <= _mapChip.transform.localScale.x / half
                 && yDirection <= _mapChip.transform.localScale.y / half)
+            {
+                _targetMapChip.SetMapChipMaterial(_defaultMaterial);
                 return;
+            }
             // 移動先のマップチップの情報を取得
             _destinationMapChip = GetMapChipData(_swipeEndPosition.x, _swipeEndPosition.y);
             isMoveMapChip = true;
@@ -162,19 +171,29 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
             var indexTargetMapChip = _map.GetIndex(_targetMapChip);
             // 斜めの移動を行わない
             if ((indexTargetMapChip.x == indexNoneMapChip.x || indexTargetMapChip.y == indexNoneMapChip.y) == false)
+            {
+                _targetMapChip.SetMapChipMaterial(_defaultMaterial);
                 return;
+            }
             // 空白のマップチップに隣接していない場合は移動しない
             if ((indexTargetMapChip.x == indexNoneMapChip.x - 1 || indexTargetMapChip.x == indexNoneMapChip.x + 1
                 || indexTargetMapChip.y == indexNoneMapChip.y - 1 || indexTargetMapChip.y == indexNoneMapChip.y + 1) == false)
+            {
+                _targetMapChip.SetMapChipMaterial(_defaultMaterial);
                 return;
+            }
             // スタート、ゴール、鍵、錠前があるマップチップ、空白のマップチップは移動しない
             if (_targetMapChip.MapChipAttribute != MapChipAttribute.Use)
+            {
+                _targetMapChip.SetMapChipMaterial(_defaultMaterial);
                 return;
+            }
             // スライドパズルである為、空白以外には移動しない
             if (_destinationMapChip.MapChipAttribute != MapChipAttribute.None)
                 return;
             // マップチップを移動させる
             ChangeMapChip(ref _targetMapChip, ref _destinationMapChip);
+            _targetMapChip.SetMapChipMaterial(_defaultMaterial);
         }
     }
 
