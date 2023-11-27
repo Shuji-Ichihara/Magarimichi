@@ -11,7 +11,6 @@ public class PlayerMove : MonoBehaviour
     private Transform _movetransfrom;
     private float colorrock = 1.0f;
     public float MoveSpeed = 3.0f;
-    private int direction = 1;
     bool _Up = false;
     bool _Down = false;
     bool _Left = false;
