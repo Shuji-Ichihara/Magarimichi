@@ -6,13 +6,11 @@ using UnityEngine;
 public enum MapChipAttribute
 {
     None = 0,
-    Start = 1 << 0,
-    Goal = 1 << 1,
-    Up = 1 << 2,
-    Down = 1 << 3,
-    Left = 1 << 4,
-    Right = 1 << 5,
-    Lock = 1 << 6,
+    Use = 1 << 0,
+    Start = 1 << 1,
+    Goal = 1 << 2,
+    Key = 1 << 3,
+    Lock = 1 << 4,
 }
 
 [RequireComponent(typeof(SpriteRenderer))]
@@ -21,13 +19,18 @@ public class MapChip : MonoBehaviour
     private SpriteRenderer _renderer = null;
 
     // マップチップの属性
-    public MapChipAttribute MapChipAttribute { get => _mapChipAttribute; }
-    private MapChipAttribute _mapChipAttribute = MapChipAttribute.None;
+    public MapChipAttribute MapChipAttribute { get => _MapChipAttribute; }
+    private MapChipAttribute _MapChipAttribute = MapChipAttribute.Use;
 
-    // スワイプの始点と終点
-    Vector3 _swipeStartPosition = Vector3.zero, _swipeEndPosition = Vector3.zero;
-    // 動かすマップチップと移動先のマップチップ
-    MapChip _targetMapChip = null, _destinationMapChip = null;
+    // プレイヤーが現在存在するマップチップから移動可能の方向
+    public Dictionary<string, bool> CanMovePlayer => _canMovePlayer;
+    private Dictionary<string, bool> _canMovePlayer = new Dictionary<string, bool>()
+    {
+        {"MoveUp",    false },
+        {"MoveDown",  false },
+        {"MoveLeft",  false },
+        {"MoveRight", false },
+    };
 
     // Start is called before the first frame update
     void Start()
@@ -37,72 +40,62 @@ public class MapChip : MonoBehaviour
         // 背景である為、一番下に配置されるようにする
         _renderer.sortingOrder = -99;
         SetUpMapChipAtrribute();
+        // 空白のマップチップである場合、MapManager に情報を格納
+        if (_MapChipAttribute == MapChipAttribute.None)
+            MapManager.Instance.SetNoneMapChip(this);
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        MoveMapChip();
-    }
-
+    #region SetUp
+    /// <summary>
+    /// マップチップの属性を設定
+    /// </summary>
     private void SetUpMapChipAtrribute()
     {
+        var map = MapManager.Instance.Map;
+        // [0, 0] はスタート固定
+        if (this == map[0, 0])
+        {
+            _MapChipAttribute = _MapChipAttribute | MapChipAttribute.Start;
+            return;
 
-    }
-
-    /// <summary>
-    /// マップチップの移動
-    /// </summary>
-    private void MoveMapChip()
-    {
-        int half = 2;
-        bool isMoveMapChip = false;
-        if (Input.GetMouseButtonDown(0))
-        {
-            var dummySwipeStartPosition = Input.mousePosition;
-            _swipeStartPosition = Camera.main.ScreenToWorldPoint(dummySwipeStartPosition);
-            _targetMapChip = MapManager.Instance.GetMapChipData(_swipeStartPosition.x, _swipeStartPosition.y);
         }
-        if (Input.GetMouseButtonUp(0))
+        // 右下 はゴール固定
+        else if (this == map[MapManager.Instance.MapChipWidthAndHeight.y - 1, MapManager.Instance.MapChipWidthAndHeight.x - 1])
         {
-            var dummySwipeEndPosition = Input.mousePosition;
-            _swipeEndPosition = Camera.main.ScreenToWorldPoint(dummySwipeEndPosition);
-            // 絶対値に変換
-            float xDirection = Mathf.Abs(GetSwipeDirection(_swipeStartPosition.x, _swipeEndPosition.x));
-            float yDirection = Mathf.Abs(GetSwipeDirection(_swipeStartPosition.y, _swipeEndPosition.y));
-            // スワイプ距離があまりにも短い場合は移動しない
-            if (xDirection <= MapManager.Instance.MapChip.transform.localScale.x / half
-                && yDirection <= MapManager.Instance.MapChip.transform.localScale.y / half)
-                return;
-            _destinationMapChip = MapManager.Instance.GetMapChipData(_swipeEndPosition.x, _swipeEndPosition.y);
-            isMoveMapChip = true;
+            _MapChipAttribute = _MapChipAttribute | MapChipAttribute.Goal;
+            return;
         }
-        if (isMoveMapChip == true)
+        // 左下は欠けている
+        else if (this == map[MapManager.Instance.MapChipWidthAndHeight.y - 1, 0])
         {
-            // いずれかのマップチップの情報が null ならば移動しない
-            if (_targetMapChip == null || _destinationMapChip == null)
-                return;
-            MapManager.Instance.ChangeMapChip(ref _targetMapChip, ref _destinationMapChip);
+            _MapChipAttribute = _MapChipAttribute & ~MapChipAttribute.Use;
+            return;
+        }
+        // 鍵のある座標は移動できない。
+        else if (transform.position == MapManager.Instance.GetKeyData().transform.position)
+        {
+            _MapChipAttribute = _MapChipAttribute | MapChipAttribute.Key;
+            return;
+        }
+        // 錠前は、ゴールの一つ上に存在
+        else if (this == map[MapManager.Instance.MapChipWidthAndHeight.y - 2, MapManager.Instance.MapChipWidthAndHeight.x - 1])
+        {
+            _MapChipAttribute = _MapChipAttribute | MapChipAttribute.Lock;
+            return;
         }
     }
-
-    /// <summary>
-    /// スワイプした距離の長さを取得
-    /// </summary>
-    /// <param name="startValue">スワイプの始点</param>
-    /// <param name="endValue">スワイプの終点</param>
-    /// <returns>始点と終点の距離</returns>
-    private float GetSwipeDirection(in float startValue, in float endValue)
-    {
-        return endValue - startValue;
-    }
-
+    #endregion
+    #region Setter
     public void SetMapChipSprite(Sprite sprite)
     {
         _renderer.sprite = sprite;
     }
 
-    // マップチップの属性を設定
-    // マップチップの移動
+    public void SetMapChipMaterial(Material material)
+    {
+        _renderer.material = material;
+    }
+    #endregion
+
     // 選択している時に、マップチップを光らせる
 }
