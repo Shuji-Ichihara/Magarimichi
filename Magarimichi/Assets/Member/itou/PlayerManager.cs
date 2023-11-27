@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class PlayerMoves : MonoBehaviour
+public class PlayerManager : MonoBehaviour
 {
     [SerializeField] private Image _Keyimage;
     [SerializeField] private float _playerMoveMax;
@@ -80,6 +80,12 @@ public class PlayerMoves : MonoBehaviour
         {
             _GetKey = true;
             _Keyimage.color = new Color(colorrock, colorrock, colorrock, colorrock);
+            Destroy(other.gameObject);
+        }
+        if (other.gameObject.CompareTag("Lock") && _GetKey == false)
+        {
+            _GetKey = false;
+            _Keyimage.color = new Color(colorrock, colorrock, colorrock, 0.3f);
             Destroy(other.gameObject);
         }
     }
