@@ -83,7 +83,7 @@ public class MapChip : MonoBehaviour
             _mapChipAttribute = _mapChipAttribute & ~MapChipAttribute.Use;
             return;
         }
-        // 鍵のある座標は移動できない。
+        // 鍵のある座標は移動できない
         else if (transform.position == MapManager.Instance.GetKeyData().transform.position)
         {
             _renderer.sprite = MapManager.Instance.KeyMapChipSprite;
@@ -99,6 +99,9 @@ public class MapChip : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// プレイヤーが移動できる方向を設定する
+    /// </summary>
     private void SetUpMoveDirection()
     {
         Sprite mapChipSprite = _renderer.sprite;
@@ -116,14 +119,31 @@ public class MapChip : MonoBehaviour
     }
     #endregion
     #region Setter
+    /// <summary>
+    /// スプライトを設定
+    /// </summary>
+    /// <param name="sprite">設定するスプライト画像</param>
     private void SetMapChipSprite(Sprite sprite)
     {
         _renderer.sprite = sprite;
     }
 
+    /// <summary>
+    /// マテリアルを設定
+    /// </summary>
+    /// <param name="material">設定するマテリアル</param>
     public void SetMapChipMaterial(Material material)
     {
         _renderer.material = material;
     }
     #endregion
+
+    /// <summary>
+    /// 鍵の属性を除去する (プレイヤー側から呼び出す)
+    /// </summary>
+    public void RemoveKeyAttribute()
+    {
+        if (_mapChipAttribute == (MapChipAttribute.Key & MapChipAttribute.Use))
+            _mapChipAttribute &= ~MapChipAttribute.Key;
+    }
 }
