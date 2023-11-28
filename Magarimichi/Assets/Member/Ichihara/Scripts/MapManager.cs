@@ -7,9 +7,11 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
 {
     #region Refarences
     // 配置するマップチップ
-    public MapChip MapChip => _mapChip;
     [SerializeField]
     private MapChip _mapChip = null;
+    // プレイヤーオブジェクト
+    [SerializeField]
+    private GameObject _player = null;
     // 鍵オブジェクト
     [SerializeField]
     private GameObject _key = null;
@@ -20,6 +22,20 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
     public List<Sprite> MapChipSprites => _mapChipSprites;
     [SerializeField]
     private List<Sprite> _mapChipSprites = new List<Sprite>();
+
+    // マップチップの属性によって設定するスプライト
+    public Sprite StartMapChipSprite => _startMapChipSprite;
+    [SerializeField]
+    private Sprite _startMapChipSprite  = null;
+    public Sprite GoalMapChipSprite => _goalMapChipSprite;
+    [SerializeField]
+    private Sprite _goalMapChipSprite = null;
+    public Sprite KeyMapChipSprite => _keyMapChipSprite;
+    [SerializeField]
+    private Sprite _keyMapChipSprite = null;
+    public Sprite LockMapChipSprite => _lockMapChipSprite;
+    [SerializeField]
+    private Sprite _lockMapChipSprite = null;
     #endregion
     #region Map
     // マップの縦横比
@@ -123,6 +139,7 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
         // 錠前が生成されるマップチップの座標
         Vector2Int lockSpawnPosition = new Vector2Int(_mapWidthAndHeight.x - 1, _mapWidthAndHeight.y - 2);
         // 生成
+        _player = Instantiate(_player, _map[0, 0].transform.position, Quaternion.identity);
         _key = Instantiate(_key, _map[keySpawnPosition.y, keySpawnPosition.x].transform.position, Quaternion.identity);
         _lock = Instantiate(_lock, _map[lockSpawnPosition.y, lockSpawnPosition.x].transform.position, Quaternion.identity);
     }
@@ -141,6 +158,9 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
             _swipeStartPosition = Camera.main.ScreenToWorldPoint(dummySwipeStartPosition);
             // 移動させるマップチップの情報を取得
             _targetMapChip = GetMapChipData(_swipeStartPosition.x, _swipeStartPosition.y);
+            // _targetMapChip が null ならばマテリアルを設定しない
+            if (_targetMapChip == null)
+                return;
             _targetMapChip.SetMapChipMaterial(_activeMaterial);
         }
         if (Input.GetMouseButtonUp(0))
@@ -159,6 +179,8 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
             }
             // 移動先のマップチップの情報を取得
             _destinationMapChip = GetMapChipData(_swipeEndPosition.x, _swipeEndPosition.y);
+            if (_destinationMapChip == null)
+                _targetMapChip.SetMapChipMaterial(_defaultMaterial);
             isMoveMapChip = true;
         }
         if (isMoveMapChip == true)
@@ -213,7 +235,7 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
             for (int widthMapChipCount = 0; widthMapChipCount < _mapWidthAndHeight.x; widthMapChipCount++)
             {
                 // 配列の要素を上書き
-                // これをしないと、インデックスを取得する時におかしな値になる
+                // これをしないとインデックスを取得する時におかしな値になる
                 if (_map[widthMapChipCount, heightMapChipCount] == targetMapChip)
                     _map.SetValue(dummyDestinationMapChip, widthMapChipCount, heightMapChipCount);
                 else if (_map[widthMapChipCount, heightMapChipCount] == destinationMapChip)
@@ -225,6 +247,10 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
     }
 
     #region Setter
+    /// <summary>
+    /// None 属性のマップチップの情報を格納
+    /// </summary>
+    /// <param name="mapChip"></param>
     public void SetNoneMapChip(MapChip mapChip)
     {
         _noneMapChip = mapChip;
@@ -282,8 +308,8 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
             return null;
         }
 #if UNITY_EDITOR
-        Debug.Log($"今回取得したマップチップは、MapChip{_map.GetIndex(mapChip)} です。");
-        //Debug.Log($"今回取得したマップチップは、MapChip{mapChip.MapChipAttribute} です。");
+        //Debug.Log($"今回取得したマップチップは、MapChip{_map.GetIndex(mapChip)} です。");
+        Debug.Log($"今回取得したマップチップは、MapChip{mapChip.MapChipAttribute} です。");
 #endif
         return mapChip;
     }
