@@ -4,9 +4,7 @@
 TagManager:
   serializedVersion: 2
   tags:
-  - Map
-  - Key
-  - Lock
+  - ScneManger
   layers:
   - Default
   - TransparentFX
@@ -14,7 +12,7 @@ TagManager:
   - 
   - Water
   - UI
-  - GimmickObject
+  - 
   - 
   - 
   - 
