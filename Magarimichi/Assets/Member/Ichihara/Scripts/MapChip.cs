@@ -19,8 +19,8 @@ public class MapChip : MonoBehaviour
     private SpriteRenderer _renderer = null;
 
     // マップチップの属性
-    public MapChipAttribute MapChipAttribute { get => _MapChipAttribute; }
-    private MapChipAttribute _MapChipAttribute = MapChipAttribute.Use;
+    public MapChipAttribute MapChipAttribute { get => _mapChipAttribute; }
+    private MapChipAttribute _mapChipAttribute = MapChipAttribute.Use;
 
     // プレイヤーが現在存在するマップチップから移動可能の方向
     public Dictionary<string, bool> CanMovePlayer => _canMovePlayer;
@@ -32,6 +32,11 @@ public class MapChip : MonoBehaviour
         {"MoveRight", false },
     };
 
+    private readonly string _moveUp = "MoveUp";
+    private readonly string _moveDown = "MoveDown";
+    private readonly string _moveLeft = "MoveLeft";
+    private readonly string _moveRight = "MoveRight";
+
     // Start is called before the first frame update
     void Start()
     {
@@ -40,9 +45,14 @@ public class MapChip : MonoBehaviour
         // 背景である為、一番下に配置されるようにする
         _renderer.sortingOrder = -99;
         SetUpMapChipAtrribute();
+        // 「Use」属性マップチップのみ、ランダムにスプライトを設定
+        var random = Random.Range(0, MapManager.Instance.MapChipSprites.Count);
+        if (_mapChipAttribute == MapChipAttribute.Use)
+            SetMapChipSprite(MapManager.Instance.MapChipSprites[random]);
         // 空白のマップチップである場合、MapManager に情報を格納
-        if (_MapChipAttribute == MapChipAttribute.None)
+        if (_mapChipAttribute == MapChipAttribute.None)
             MapManager.Instance.SetNoneMapChip(this);
+        SetUpMoveDirection();
     }
 
     #region SetUp
@@ -55,38 +65,58 @@ public class MapChip : MonoBehaviour
         // [0, 0] はスタート固定
         if (this == map[0, 0])
         {
-            _MapChipAttribute = _MapChipAttribute | MapChipAttribute.Start;
+            _renderer.sprite = MapManager.Instance.StartMapChipSprite;
+            _mapChipAttribute = _mapChipAttribute | MapChipAttribute.Start;
             return;
 
         }
         // 右下 はゴール固定
         else if (this == map[MapManager.Instance.MapChipWidthAndHeight.y - 1, MapManager.Instance.MapChipWidthAndHeight.x - 1])
         {
-            _MapChipAttribute = _MapChipAttribute | MapChipAttribute.Goal;
+            _renderer.sprite = MapManager.Instance.GoalMapChipSprite;
+            _mapChipAttribute = _mapChipAttribute | MapChipAttribute.Goal;
             return;
         }
         // 左下は欠けている
         else if (this == map[MapManager.Instance.MapChipWidthAndHeight.y - 1, 0])
         {
-            _MapChipAttribute = _MapChipAttribute & ~MapChipAttribute.Use;
+            _mapChipAttribute = _mapChipAttribute & ~MapChipAttribute.Use;
             return;
         }
         // 鍵のある座標は移動できない。
         else if (transform.position == MapManager.Instance.GetKeyData().transform.position)
         {
-            _MapChipAttribute = _MapChipAttribute | MapChipAttribute.Key;
+            _renderer.sprite = MapManager.Instance.KeyMapChipSprite;
+            _mapChipAttribute = _mapChipAttribute | MapChipAttribute.Key;
             return;
         }
         // 錠前は、ゴールの一つ上に存在
         else if (this == map[MapManager.Instance.MapChipWidthAndHeight.y - 2, MapManager.Instance.MapChipWidthAndHeight.x - 1])
         {
-            _MapChipAttribute = _MapChipAttribute | MapChipAttribute.Lock;
+            _renderer.sprite = MapManager.Instance.LockMapChipSprite;
+            _mapChipAttribute = _mapChipAttribute | MapChipAttribute.Lock;
             return;
         }
     }
+
+    private void SetUpMoveDirection()
+    {
+        Sprite mapChipSprite = _renderer.sprite;
+        string mapChipSpriteName = mapChipSprite.name;
+        // プレイヤーが移動できる方向を設定
+        if (mapChipSpriteName.Contains("Up") == true)
+            _canMovePlayer[_moveUp] = true;
+        if (mapChipSpriteName.Contains("Down") == true)
+            _canMovePlayer[_moveDown] = true;
+        if (mapChipSpriteName.Contains("Left") == true)
+            _canMovePlayer[_moveLeft] = true;
+        if (mapChipSpriteName.Contains("Right") == true)
+            _canMovePlayer[_moveRight] = true;
+
+    }
     #endregion
     #region Setter
-    public void SetMapChipSprite(Sprite sprite)
+    private void SetMapChipSprite(Sprite sprite)
     {
         _renderer.sprite = sprite;
     }
@@ -96,6 +126,4 @@ public class MapChip : MonoBehaviour
         _renderer.material = material;
     }
     #endregion
-
-    // 選択している時に、マップチップを光らせる
 }
