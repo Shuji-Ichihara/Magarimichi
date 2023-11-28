@@ -7,7 +7,6 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
 {
     #region Refarences
     // 配置するマップチップ
-    public MapChip MapChip => _mapChip;
     [SerializeField]
     private MapChip _mapChip = null;
     // 鍵オブジェクト
@@ -20,6 +19,20 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
     public List<Sprite> MapChipSprites => _mapChipSprites;
     [SerializeField]
     private List<Sprite> _mapChipSprites = new List<Sprite>();
+
+    // マップチップの属性によって設定するスプライト
+    public Sprite StartMapChipSprite => _startMapChipSprite;
+    [SerializeField]
+    private Sprite _startMapChipSprite  = null;
+    public Sprite GoalMapChipSprite => _goalMapChipSprite;
+    [SerializeField]
+    private Sprite _goalMapChipSprite = null;
+    public Sprite KeyMapChipSprite => _keyMapChipSprite;
+    [SerializeField]
+    private Sprite _keyMapChipSprite = null;
+    public Sprite LockMapChipSprite => _lockMapChipSprite;
+    [SerializeField]
+    private Sprite _lockMapChipSprite = null;
     #endregion
     #region Map
     // マップの縦横比
@@ -141,6 +154,9 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
             _swipeStartPosition = Camera.main.ScreenToWorldPoint(dummySwipeStartPosition);
             // 移動させるマップチップの情報を取得
             _targetMapChip = GetMapChipData(_swipeStartPosition.x, _swipeStartPosition.y);
+            // _targetMapChip が null ならばマテリアルを設定しない
+            if (_targetMapChip == null)
+                return;
             _targetMapChip.SetMapChipMaterial(_activeMaterial);
         }
         if (Input.GetMouseButtonUp(0))
@@ -159,6 +175,8 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
             }
             // 移動先のマップチップの情報を取得
             _destinationMapChip = GetMapChipData(_swipeEndPosition.x, _swipeEndPosition.y);
+            if (_destinationMapChip == null)
+                _targetMapChip.SetMapChipMaterial(_defaultMaterial);
             isMoveMapChip = true;
         }
         if (isMoveMapChip == true)
