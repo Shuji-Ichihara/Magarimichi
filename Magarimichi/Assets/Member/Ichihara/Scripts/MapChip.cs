@@ -16,6 +16,7 @@ public enum MapChipAttribute
 [RequireComponent(typeof(SpriteRenderer))]
 public class MapChip : MonoBehaviour
 {
+    // このスクリプトが設定されているプレハブのレンダラー
     private SpriteRenderer _renderer = null;
 
     // マップチップの属性
@@ -31,11 +32,6 @@ public class MapChip : MonoBehaviour
         {"MoveLeft",  false },
         {"MoveRight", false },
     };
-
-    private readonly string _moveUp = "MoveUp";
-    private readonly string _moveDown = "MoveDown";
-    private readonly string _moveLeft = "MoveLeft";
-    private readonly string _moveRight = "MoveRight";
 
     // Start is called before the first frame update
     void Start()
@@ -106,15 +102,17 @@ public class MapChip : MonoBehaviour
     {
         Sprite mapChipSprite = _renderer.sprite;
         string mapChipSpriteName = mapChipSprite.name;
-        // プレイヤーが移動できる方向を設定
+        // プレイヤーからの入力と比較する為に使用
+        // ex) プレイヤーが下方向に移動したい場合、_canMovePlayer の MoveDown キーが true ならば下方向に移動する
+        //     しかし、マップチップのイメージは上方向に道が開いている為、ファイル名とは逆方向の key の値を変更している
         if (mapChipSpriteName.Contains("Up") == true)
-            _canMovePlayer[_moveUp] = true;
+            _canMovePlayer[Common.MoveDown] = true;
         if (mapChipSpriteName.Contains("Down") == true)
-            _canMovePlayer[_moveDown] = true;
+            _canMovePlayer[Common.MoveUp] = true;
         if (mapChipSpriteName.Contains("Left") == true)
-            _canMovePlayer[_moveLeft] = true;
+            _canMovePlayer[Common.MoveRight] = true;
         if (mapChipSpriteName.Contains("Right") == true)
-            _canMovePlayer[_moveRight] = true;
+            _canMovePlayer[Common.MoveLeft] = true;
 
     }
     #endregion
@@ -144,6 +142,6 @@ public class MapChip : MonoBehaviour
     public void RemoveKeyAttribute()
     {
         if (_mapChipAttribute == (MapChipAttribute.Key & MapChipAttribute.Use))
-            _mapChipAttribute &= ~MapChipAttribute.Key;
+            _mapChipAttribute = _mapChipAttribute & ~MapChipAttribute.Key;
     }
 }
