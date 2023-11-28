@@ -231,7 +231,7 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
             for (int widthMapChipCount = 0; widthMapChipCount < _mapWidthAndHeight.x; widthMapChipCount++)
             {
                 // 配列の要素を上書き
-                // これをしないと、インデックスを取得する時におかしな値になる
+                // これをしないとインデックスを取得する時におかしな値になる
                 if (_map[widthMapChipCount, heightMapChipCount] == targetMapChip)
                     _map.SetValue(dummyDestinationMapChip, widthMapChipCount, heightMapChipCount);
                 else if (_map[widthMapChipCount, heightMapChipCount] == destinationMapChip)
@@ -243,6 +243,10 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
     }
 
     #region Setter
+    /// <summary>
+    /// None 属性のマップチップの情報を格納
+    /// </summary>
+    /// <param name="mapChip"></param>
     public void SetNoneMapChip(MapChip mapChip)
     {
         _noneMapChip = mapChip;
@@ -300,8 +304,8 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
             return null;
         }
 #if UNITY_EDITOR
-        Debug.Log($"今回取得したマップチップは、MapChip{_map.GetIndex(mapChip)} です。");
-        //Debug.Log($"今回取得したマップチップは、MapChip{mapChip.MapChipAttribute} です。");
+        //Debug.Log($"今回取得したマップチップは、MapChip{_map.GetIndex(mapChip)} です。");
+        Debug.Log($"今回取得したマップチップは、MapChip{mapChip.MapChipAttribute} です。");
 #endif
         return mapChip;
     }
