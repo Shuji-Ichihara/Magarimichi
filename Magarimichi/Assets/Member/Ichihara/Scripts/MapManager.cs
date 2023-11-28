@@ -9,6 +9,9 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
     // 配置するマップチップ
     [SerializeField]
     private MapChip _mapChip = null;
+    // プレイヤーオブジェクト
+    [SerializeField]
+    private GameObject _player = null;
     // 鍵オブジェクト
     [SerializeField]
     private GameObject _key = null;
@@ -136,6 +139,7 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
         // 錠前が生成されるマップチップの座標
         Vector2Int lockSpawnPosition = new Vector2Int(_mapWidthAndHeight.x - 1, _mapWidthAndHeight.y - 2);
         // 生成
+        _player = Instantiate(_player, _map[0, 0].transform.position, Quaternion.identity);
         _key = Instantiate(_key, _map[keySpawnPosition.y, keySpawnPosition.x].transform.position, Quaternion.identity);
         _lock = Instantiate(_lock, _map[lockSpawnPosition.y, lockSpawnPosition.x].transform.position, Quaternion.identity);
     }
