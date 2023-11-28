@@ -10,7 +10,7 @@ public static class Extensions
     /// </summary>
     /// <typeparam name="T">ジェネリック化</typeparam>
     /// <param name="array"> element が格納されている配列</param>
-    /// <param name="element">Index を取得したい要素</param>
+    /// <param name="element">インデックスを取得したい要素</param>
     /// <returns>element が存在する配列の Index (二次元配列の Index を返す為、Vector2Int を 2 つの Index のまとまりとして返す)</returns>
     public static Vector2Int GetIndex<T>(this T[,] array, T element) where T : MapChip
     {
@@ -28,4 +28,13 @@ public static class Extensions
         }
         return new Vector2Int(line, column);
     }
+}
+
+public class Common
+{
+    // プレイヤーの移動に使用する。 MapChip の CanMovePlayer のキー
+    public static readonly string MoveUp = "MoveUp";
+    public static readonly string MoveDown = "MoveDown";
+    public static readonly string MoveLeft = "MoveLeft";
+    public static readonly string MoveRight = "MoveRight";
 }
