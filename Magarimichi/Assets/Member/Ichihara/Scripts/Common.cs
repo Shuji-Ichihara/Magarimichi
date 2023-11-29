@@ -6,12 +6,12 @@
 public static class Extensions
 {
     /// <summary>
-    /// 二次元配列の Index を取得する
+    /// 二次元配列のインデックスを取得する
     /// </summary>
     /// <typeparam name="T">ジェネリック化</typeparam>
     /// <param name="array"> element が格納されている配列</param>
     /// <param name="element">インデックスを取得したい要素</param>
-    /// <returns>element が存在する配列の Index (二次元配列の Index を返す為、Vector2Int を 2 つの Index のまとまりとして返す)</returns>
+    /// <returns>element が存在する配列のインデックス (二次元配列のインデックスを返す為、Vector2Int を 2 つのインデックスのまとまりとして返す)</returns>
     public static Vector2Int GetIndex<T>(this T[,] array, T element) where T : MapChip
     {
         int line = 0, column = 0;
