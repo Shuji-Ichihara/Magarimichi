@@ -25,7 +25,7 @@ public class PlayerSample : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        var mapChipData = MapManager.Instance.GetMapChipData(transform.position.x, transform.position.y);
+        MapChip mapChipData = MapManager.Instance.GetMapChipData(transform.position.x, transform.position.y);
         if (mapChipData != null)
             SetMapChipData(mapChipData);
         else
@@ -81,7 +81,9 @@ public class PlayerSample : MonoBehaviour
         }
         catch (System.IndexOutOfRangeException)
         {
+#if UNITY_EDITOR
             Debug.LogWarning($"{name} はこの先に移動できません。");
+#endif
             throw;
         }
     }
