@@ -22,7 +22,7 @@ public class MapChip : MonoBehaviour
     public MapChipAttribute MapChipAttribute { get => _mapChipAttribute; }
     private MapChipAttribute _mapChipAttribute = MapChipAttribute.Use;
 
-    // プレイヤーが現在存在するマップチップから移動可能の方向
+    // プレイヤーが現在存在するマップチップから移動可能な方向
     public Dictionary<string, bool> CanMovePlayer => _canMovePlayer;
     private Dictionary<string, bool> _canMovePlayer = new Dictionary<string, bool>()
     {
