@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 [System.Flags]
@@ -27,10 +26,10 @@ public class MapChip : MonoBehaviour
     public Dictionary<string, bool> CanMovePlayer => _canMovePlayer;
     private Dictionary<string, bool> _canMovePlayer = new Dictionary<string, bool>()
     {
-        {"MoveUp",    false },
-        {"MoveDown",  false },
-        {"MoveLeft",  false },
-        {"MoveRight", false },
+        {Common.MoveUp,    false },
+        {Common.MoveDown,  false },
+        {Common.MoveLeft,  false },
+        {Common.MoveRight, false },
     };
 
     // Start is called before the first frame update
@@ -66,27 +65,27 @@ public class MapChip : MonoBehaviour
             return;
 
         }
-        // 右下 はゴール固定
+        // 右下はゴール固定
         else if (this == map[MapManager.Instance.MapChipWidthAndHeight.y - 1, MapManager.Instance.MapChipWidthAndHeight.x - 1])
         {
             _renderer.sprite = MapManager.Instance.GoalMapChipSprite;
             _mapChipAttribute = _mapChipAttribute | MapChipAttribute.Goal;
             return;
         }
-        // 左下は欠けている
+        // ゲーム開始時、左下は欠けている
         else if (this == map[MapManager.Instance.MapChipWidthAndHeight.y - 1, 0])
         {
             _mapChipAttribute = _mapChipAttribute & ~MapChipAttribute.Use;
             return;
         }
-        // 鍵のある座標は移動できない
+        // 鍵のあるマップチップは移動できない
         else if (transform.position == MapManager.Instance.GetKeyData().transform.position)
         {
             _renderer.sprite = MapManager.Instance.KeyMapChipSprite;
             _mapChipAttribute = _mapChipAttribute | MapChipAttribute.Key;
             return;
         }
-        // 錠前は、ゴールの一つ上に存在
+        // 錠前はゴールの一つ上に存在
         else if (this == map[MapManager.Instance.MapChipWidthAndHeight.y - 2, MapManager.Instance.MapChipWidthAndHeight.x - 1])
         {
             _renderer.sprite = MapManager.Instance.LockMapChipSprite;
@@ -103,19 +102,28 @@ public class MapChip : MonoBehaviour
         Sprite mapChipSprite = _renderer.sprite;
         string mapChipSpriteName = mapChipSprite.name;
         // プレイヤーからの入力と比較する為に使用
-        // ex) プレイヤーが下方向に移動したい場合、_canMovePlayer の MoveDown キーが true ならば下方向に移動する
-        //     しかし、マップチップのイメージは上方向に道が開いている為、ファイル名とは逆方向の key の値を変更している
-        if (mapChipSpriteName.Contains("Up") == true)
-            _canMovePlayer[Common.MoveDown] = true;
-        if (mapChipSpriteName.Contains("Down") == true)
+        // Input.GetKeyDown, Input.Getkey と比較すると良い(Player のサンプルを用意)
+        if (mapChipSpriteName.Contains("_Up") == true)
             _canMovePlayer[Common.MoveUp] = true;
-        if (mapChipSpriteName.Contains("Left") == true)
-            _canMovePlayer[Common.MoveRight] = true;
-        if (mapChipSpriteName.Contains("Right") == true)
+        if (mapChipSpriteName.Contains("_Down") == true)
+            _canMovePlayer[Common.MoveDown] = true;
+        if (mapChipSpriteName.Contains("_Left") == true)
             _canMovePlayer[Common.MoveLeft] = true;
+        if (mapChipSpriteName.Contains("_Right") == true)
+            _canMovePlayer[Common.MoveRight] = true;
 
     }
     #endregion
+
+    /// <summary>
+    /// 鍵の属性を除去する (プレイヤー側から呼び出す)
+    /// </summary>
+    public void RemoveKeyAttribute()
+    {
+        if (_mapChipAttribute == (MapChipAttribute.Key | MapChipAttribute.Use))
+            _mapChipAttribute = _mapChipAttribute & ~MapChipAttribute.Key;
+    }
+
     #region Setter
     /// <summary>
     /// スプライトを設定
@@ -135,13 +143,4 @@ public class MapChip : MonoBehaviour
         _renderer.material = material;
     }
     #endregion
-
-    /// <summary>
-    /// 鍵の属性を除去する (プレイヤー側から呼び出す)
-    /// </summary>
-    public void RemoveKeyAttribute()
-    {
-        if (_mapChipAttribute == (MapChipAttribute.Key & MapChipAttribute.Use))
-            _mapChipAttribute = _mapChipAttribute & ~MapChipAttribute.Key;
-    }
 }
