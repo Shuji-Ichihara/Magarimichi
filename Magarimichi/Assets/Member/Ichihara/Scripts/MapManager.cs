@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -18,15 +17,16 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
     // 錠前オブジェくト
     [SerializeField]
     private GameObject _lock = null;
+    #endregion
+    #region Sprites
     // マップチップに設定するスプライトの配列
     public List<Sprite> MapChipSprites => _mapChipSprites;
     [SerializeField]
     private List<Sprite> _mapChipSprites = new List<Sprite>();
-
     // マップチップの属性によって設定するスプライト
     public Sprite StartMapChipSprite => _startMapChipSprite;
     [SerializeField]
-    private Sprite _startMapChipSprite  = null;
+    private Sprite _startMapChipSprite = null;
     public Sprite GoalMapChipSprite => _goalMapChipSprite;
     [SerializeField]
     private Sprite _goalMapChipSprite = null;
@@ -57,8 +57,11 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
     // 選択中のマテリアル
     [SerializeField]
     private Material _activeMaterial = null;
+    // 通常時のマテリアル
     [SerializeField]
     private Material _defaultMaterial = null;
+    // ゴールのテスト用フラグ
+    private bool _isReachedGoal = false;
     #endregion
 
     new private void Awake()
@@ -68,6 +71,11 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
         {
             GameObject obj = Resources.Load("Prefabs/MapChip") as GameObject;
             _mapChip = obj.GetComponent<MapChip>();
+        }
+        if (_player == null)
+        {
+            GameObject obj = Resources.Load("Prefabs/Player") as GameObject;
+            _player = obj;
         }
         if (_key == null)
         {
@@ -88,6 +96,13 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
     private void Update()
     {
         MoveMapChip();
+        GoalCheck();
+        // TODO: プレイヤー側で定義したフラグを使用する
+        if (_isReachedGoal == true)
+        {
+            // TODO: ゴール時の処理を記述する
+            Debug.Log("Goal!!");
+        }
     }
 
     /// <summary>
@@ -152,7 +167,7 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
         int half = 2;
         // マップチップを動かせるフラグ
         bool isMoveMapChip = false;
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(0) == true)
         {
             var dummySwipeStartPosition = Input.mousePosition;
             _swipeStartPosition = Camera.main.ScreenToWorldPoint(dummySwipeStartPosition);
@@ -161,9 +176,15 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
             // _targetMapChip が null ならばマテリアルを設定しない
             if (_targetMapChip == null)
                 return;
+            // プレイヤーが乗っているマップチップは移動しない
+            if (_targetMapChip.transform.position == _player.transform.position)
+            {
+                _targetMapChip.SetMapChipMaterial(_defaultMaterial);
+                return;
+            }
             _targetMapChip.SetMapChipMaterial(_activeMaterial);
         }
-        if (Input.GetMouseButtonUp(0))
+        if (Input.GetMouseButtonUp(0) == true)
         {
             var dummySwipeEndPosition = Input.mousePosition;
             _swipeEndPosition = Camera.main.ScreenToWorldPoint(dummySwipeEndPosition);
@@ -212,7 +233,10 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
             }
             // スライドパズルである為、空白以外には移動しない
             if (_destinationMapChip.MapChipAttribute != MapChipAttribute.None)
+            {
+                _targetMapChip.SetMapChipMaterial(_defaultMaterial);
                 return;
+            }
             // マップチップを移動させる
             ChangeMapChip(ref _targetMapChip, ref _destinationMapChip);
             _targetMapChip.SetMapChipMaterial(_defaultMaterial);
@@ -228,8 +252,6 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
     {
         Vector3 targetPosition = targetMapChip.transform.position, destinationPosition = destinationMapChip.transform.position;
         MapChip dummyTargetMapChip = targetMapChip, dummyDestinationMapChip = destinationMapChip;
-        //var targetMapChipIndex = _map.GetIndex(targetMapChip);
-        //var destinationMapChipIndex = _map.GetIndex(destinationMapChip);
         for (int heightMapChipCount = 0; heightMapChipCount < _mapWidthAndHeight.y; heightMapChipCount++)
         {
             for (int widthMapChipCount = 0; widthMapChipCount < _mapWidthAndHeight.x; widthMapChipCount++)
@@ -246,6 +268,23 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
         destinationMapChip.transform.position = targetPosition;
     }
 
+    /// <summary>
+    /// プレイヤーがゴールしたかを判定
+    /// </summary>
+    public void GoalCheck()
+    {
+        int half = 2;
+        // プレイヤーの座標、ゴールのマップチップの座標
+        Vector3 playerPosition = _player.transform.position,
+                mapChipPosition = _map[MapChipWidthAndHeight.x - 1, _mapWidthAndHeight.y - 1].transform.position;
+        // プレイヤーオブジェクトのスケール
+        float playerXScale = _player.transform.localScale.x, playerYScale = _player.transform.localScale.y;
+        // プレイヤーの座標がゴールのマップチップの中心と重なったらゴールする
+        if (playerPosition.x <= mapChipPosition.x + playerXScale / half && playerPosition.x >= mapChipPosition.x - playerXScale / half)
+            if (playerPosition.y <= mapChipPosition.y + playerYScale / half && playerPosition.y >= mapChipPosition.y - playerYScale / half)
+                _isReachedGoal = true;
+    }
+
     #region Setter
     /// <summary>
     /// None 属性のマップチップの情報を格納
@@ -258,12 +297,21 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
     #endregion
     #region Getter
     /// <summary>
-    /// が魏のデータを取得
+    /// 魏のデータを取得
     /// </summary>
     /// <returns>鍵のゲームオブジェクト</returns>
     public GameObject GetKeyData()
     {
         return _key;
+    }
+
+    /// <summary>
+    /// 錠前のデータを取得
+    /// </summary>
+    /// <returns></returns>錠前のゲームオブジェクト
+    public GameObject GetLockData()
+    {
+        return _lock;
     }
 
     /// <summary>
@@ -283,7 +331,7 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
     /// <param name="xPosition">指定したマップチップの X 座標</param>
     /// <param name="yPosition">指定したマップチップの Y 座標</param>
     /// <returns>マップチップの情報</returns>
-    private MapChip GetMapChipData(float xPosition, float yPosition)
+    public MapChip GetMapChipData(float xPosition, float yPosition)
     {
         int half = 2;
         MapChip mapChip = null;
@@ -309,7 +357,7 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
         }
 #if UNITY_EDITOR
         //Debug.Log($"今回取得したマップチップは、MapChip{_map.GetIndex(mapChip)} です。");
-        Debug.Log($"今回取得したマップチップは、MapChip{mapChip.MapChipAttribute} です。");
+        //Debug.Log($"今回取得したマップチップは、MapChip{mapChip.MapChipAttribute} です。");
 #endif
         return mapChip;
     }
