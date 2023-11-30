@@ -101,8 +101,8 @@ public class MapChip : MonoBehaviour
     {
         Sprite mapChipSprite = _renderer.sprite;
         string mapChipSpriteName = mapChipSprite.name;
-        // プレイヤーからの入力と比較する為に使用
-        // Input.GetKeyDown, Input.Getkey と比較すると良い(Player のサンプルを用意)
+        // プレイヤーがこのマップチップからどこに移動できるかを設定
+        // 隣接しているマップチップと道が接続されているかを比較する為に使用
         if (mapChipSpriteName.Contains("_Up") == true)
             _canMovePlayer[Common.MoveUp] = true;
         if (mapChipSpriteName.Contains("_Down") == true)
