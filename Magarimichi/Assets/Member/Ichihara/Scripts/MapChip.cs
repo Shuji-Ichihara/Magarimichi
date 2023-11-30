@@ -4,12 +4,12 @@ using UnityEngine;
 [System.Flags]
 public enum MapChipAttribute
 {
-    None = 0,
-    Use = 1 << 0,
+    None  = 0,
+    Use   = 1 << 0,
     Start = 1 << 1,
-    Goal = 1 << 2,
-    Key = 1 << 3,
-    Lock = 1 << 4,
+    Goal  = 1 << 2,
+    Key   = 1 << 3,
+    Lock  = 1 << 4,
 }
 
 [RequireComponent(typeof(SpriteRenderer))]
