@@ -17,7 +17,7 @@ public class PlayerManager : MonoBehaviour
     private float _playerMove;
     private float _movestart;
     private float colorrock = 1.0f;
-    private float MoveSpeed = 1.5f;
+    private float MoveSpeed = 2.0f;
     private int direction = 1;
     public bool _UpStart;
     public bool _DownStart;

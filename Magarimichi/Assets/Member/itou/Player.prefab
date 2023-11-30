@@ -100,7 +100,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _Keyimage: {fileID: 0}
-  _playerMoveMax: 65
+  _playerMoveMax: 50
   _movestartMax: 100
   _UpStart: 0
   _DownStart: 0

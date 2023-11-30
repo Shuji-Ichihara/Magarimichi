@@ -29,8 +29,6 @@ public class Button : MonoBehaviour
 
     IEnumerator SceneMove()
     {
-        yield return new WaitForSeconds(3);
-
         Scene = GameObject.FindGameObjectWithTag("ScneManger");
         switch (Noumber)
         {
@@ -47,5 +45,6 @@ public class Button : MonoBehaviour
                 Scene.GetComponent<SceneManger>()._LoadScene(Name.ResultScene);
                 break;
         }
+        yield return new WaitForSeconds(3);
     }
 }
