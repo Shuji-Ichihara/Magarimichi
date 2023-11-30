@@ -104,8 +104,8 @@ public class PlayerSample : MonoBehaviour
         // 鍵を取得
         if (other.name == MapManager.Instance.GetKeyData().name)
         {
-            other.gameObject.SetActive(false);
             _mapChip.RemoveKeyAttribute();
+            other.gameObject.SetActive(false);
         }
         // 錠前を開錠
         if (other.name == MapManager.Instance.GetLockData().name)
