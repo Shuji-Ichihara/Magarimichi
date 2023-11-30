@@ -179,15 +179,6 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
             // _targetMapChip が null ならばマテリアルを設定しない
             if (_targetMapChip == null)
                 return;
-            // プレイヤーが乗っているマップチップは移動しない
-            if (_player.transform.position.x >= _targetMapChip.transform.position.x - _player.transform.localScale.x / half
-                && _player.transform.position.x <= _targetMapChip.transform.position.x + _player.transform.localScale.x / half)
-                if (_player.transform.position.y >= _targetMapChip.transform.position.y - _player.transform.localScale.y / half
-                    && _player.transform.position.y <= _targetMapChip.transform.position.y + _player.transform.localScale.y / half)
-            {
-                _targetMapChip.SetMapChipMaterial(_defaultMaterial);
-                return;
-            }
             _targetMapChip.SetMapChipMaterial(_activeMaterial);
         }
         if (Input.GetMouseButtonUp(0) == true)
@@ -204,6 +195,15 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
                 _targetMapChip.SetMapChipMaterial(_defaultMaterial);
                 return;
             }
+            // プレイヤーが乗っているマップチップは移動しない
+            if (_player.transform.position.x >= _targetMapChip.transform.position.x - _player.transform.localScale.x / half
+                && _player.transform.position.x <= _targetMapChip.transform.position.x + _player.transform.localScale.x / half)
+                if (_player.transform.position.y >= _targetMapChip.transform.position.y - _player.transform.localScale.y / half
+                    && _player.transform.position.y <= _targetMapChip.transform.position.y + _player.transform.localScale.y / half)
+                {
+                    _targetMapChip.SetMapChipMaterial(_defaultMaterial);
+                    return;
+                }
             // 移動先のマップチップの情報を取得
             _destinationMapChip = GetMapChipData(_swipeEndPosition.x, _swipeEndPosition.y);
             if (_destinationMapChip == null)
