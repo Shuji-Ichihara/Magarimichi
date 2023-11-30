@@ -41,15 +41,9 @@ public class Button : MonoBehaviour
                 Scene.GetComponent<SceneManger>()._LoadScene(Name.StageSelect);
                 break;
             case 2:
-                Scene.GetComponent<SceneManger>()._LoadScene(Name.Main1);
+                Scene.GetComponent<SceneManger>()._LoadScene(Name.MainScene);
                 break;
             case 3:
-                Scene.GetComponent<SceneManger>()._LoadScene(Name.Main2);
-                break;
-            case 4:
-                Scene.GetComponent<SceneManger>()._LoadScene(Name.Main3);
-                break;
-            case 5:
                 Scene.GetComponent<SceneManger>()._LoadScene(Name.ResultScene);
                 break;
         }

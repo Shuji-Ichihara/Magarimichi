@@ -426,7 +426,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Button
+  m_Text: Stage1
 --- !u!222 &387818898
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -506,7 +506,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Button
+  m_Text: Stage3
 --- !u!222 &394607808
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -1156,7 +1156,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Button
+  m_Text: Stage2
 --- !u!222 &1716465786
 CanvasRenderer:
   m_ObjectHideFlags: 0

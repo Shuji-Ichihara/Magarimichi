@@ -4,6 +4,8 @@ using Random = UnityEngine.Random;
 
 public class MapManager : SingletonMonoBehaviour<MapManager>
 {
+    [SerializeField]
+    private Button _button;
     #region Refarences
     // 配置するマップチップ
     [SerializeField]
@@ -101,7 +103,8 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
         if (_isReachedGoal == true)
         {
             // TODO: ゴール時の処理を記述する
-            Debug.Log("Goal!!");
+            _button.Noumber = 3;
+            _button.SceneMoving();
         }
     }
 

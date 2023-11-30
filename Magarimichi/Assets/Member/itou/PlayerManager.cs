@@ -9,15 +9,16 @@ public class PlayerManager : MonoBehaviour
     [SerializeField] private float _playerMoveMax;
     [SerializeField] private float _movestartMax;
     private SpriteRenderer _mapSprite;
+    private readonly KeyCode _movedUpKey = KeyCode.W;
+    private readonly KeyCode _movedDownKey = KeyCode.S;
+    private readonly KeyCode _movedLeftKey = KeyCode.A;
+    private readonly KeyCode _movedRightKey = KeyCode.D;
+    private MapChip _mapChip = null;
     private float _playerMove;
     private float _movestart;
     private float colorrock = 1.0f;
-    private float MoveSpeed = 1.0f;
+    private float MoveSpeed = 1.5f;
     private int direction = 1;
-    public bool _Up;
-    public bool _Down;
-    public bool _Left;
-    public bool _Right;
     public bool _UpStart;
     public bool _DownStart;
     public bool _LeftStart;
@@ -29,21 +30,9 @@ public class PlayerManager : MonoBehaviour
         _Keyimage = GameObject.Find("Key").GetComponent<Image>();
         _Keyimage.color = new Color(colorrock, colorrock, colorrock, 0.3f);
     }
-    void FixedUpdate()
+
+    private void FixedUpdate()
     {
-        _movestart++;
-        if (_playerMoveMax <= _playerMove)
-        {
-            _UpStart = false;
-            _DownStart = false;
-            _LeftStart = false;
-            _RightStart = false;
-            _Up = false;
-            _Down = false;
-            _Left = false;
-            _Right = false;
-            _playerMove = 0;
-        }
         if (_UpStart)
         {
             _playerMove++;
@@ -68,96 +57,90 @@ public class PlayerManager : MonoBehaviour
             direction = -1;
             this.transform.position = new Vector3(this.transform.position.x + MoveSpeed * Time.fixedDeltaTime * direction, this.transform.position.y, this.transform.position.z);
         }
-        if (_Right)
+    }
+    void Update()
+    {
+        MapChip mapChipData = MapManager.Instance.GetMapChipData(transform.position.x, transform.position.y);
+        if (mapChipData != null)
+            SetMapChipData(mapChipData);
+        if (_mapChip == null)
+            return;
+        var mapData = MapManager.Instance.Map;
+        Vector2Int mapChipIndex = mapData.GetIndex(_mapChip);
+        _movestart++;
+        if (_playerMoveMax <= _playerMove)
         {
-            _RightStart = true;
             _UpStart = false;
             _DownStart = false;
             _LeftStart = false;
+            _RightStart = false;
+            _playerMove = 0;
         }
-        else if (_Down)
+        if (Input.GetKeyDown(_movedRightKey) == true)
         {
-            _DownStart = true;
-            _UpStart = false;
-            _LeftStart = false;
-        }
-        else if (_Left)
-        {
-            _LeftStart = true;
-            _UpStart = false;
-        }
-        else if (_Up)
-        {
-            _UpStart = true;
-        }
-        if(_movestartMax < _movestart)
-        {
-            _movestart = 0;
-            switch (_mapSprite.sprite.name)
+            MapChip targetMapChip = mapData[mapChipIndex.x, mapChipIndex.y];
+            MapChip destitaionMapChip = mapData[mapChipIndex.x, mapChipIndex.y + 1];
+            // プレイヤーが現在いるマップチップと移動先のマップチップを比較する
+            if (targetMapChip.CanMovePlayer[Common.MoveRight] == true && destitaionMapChip.CanMovePlayer[Common.MoveLeft] == true)
             {
-                case "Magarimichi_MapChip_Start_Down_Right":
-                    _Right = true;
-                    _Down = true;
-                    break;
-                case "Magarimichi_MapChip_Down_Left":
-                    _Down = true;
-                    _Left = true;
-                    break;
-                case "Magarimichi_MapChip_Down_Left_Right":
-                    _Right = true;
-                    _Down = true;
-                    _Left = true;
-                    break;
-                case "Magarimichi_MapChip_Key_Up_Down_Left_Right":
-                    _Up = true;
-                    _Down = true;
-                    _Left = true;
-                    _Right = true;
-                    break;
-                case "Magarimichi_MapChip_Left_Right":
-                    _Right = true;
-                    _Left = true;
-                    break;
-                case "Magarimichi_MapChip_Up_Down":
-                    _Down = true;
-                    _Up = true;
-                    break;
-                case "Magarimichi_MapChip_Up_Down_Left":
-                    _Down = true;
-                    _Left = true;
-                    _Up = true;
-                    break;
-                case "Magarimichi_MapChip_Up_Down_Right":
-                    _Right = true;
-                    _Down = true;
-                    _Up = true;
-                    break;
-                case "Magarimichi_MapChip_Up_Left":
-                    _Left = true;
-                    _Up = true;
-                    break;
-                case "Magarimichi_MapChip_Up_Left_Right":
-                    _Right = true;
-                    _Left = true;
-                    _Up = true;
-                    break;
-                case "Magarimichi_MapChip_Up_RIght":
-                    _Right = true;
-                    _Up = true;
-                    break;
-                case "Magarimichi_MapChip_Goal_Up":
-                    break;
-                default:
-                    break;
+                if (destitaionMapChip.MapChipAttribute == (MapChipAttribute.Use | MapChipAttribute.Lock) && _GetKey == false)
+                    return;
+                if (destitaionMapChip.MapChipAttribute == (MapChipAttribute.None))
+                    return;
+                _RightStart = true;
+                _movestart = 0;
+            }
+        }
+        if (Input.GetKeyDown(_movedDownKey) == true)
+        {
+            MapChip targetMapChip = mapData[mapChipIndex.x, mapChipIndex.y];
+            MapChip destitaionMapChip = mapData[mapChipIndex.x + 1, mapChipIndex.y];
+            // プレイヤーが現在いるマップチップと移動先のマップチップを比較する
+            if (targetMapChip.CanMovePlayer[Common.MoveDown] == true && destitaionMapChip.CanMovePlayer[Common.MoveUp] == true)
+            {
+                if (destitaionMapChip.MapChipAttribute == (MapChipAttribute.Use | MapChipAttribute.Lock) && _GetKey == false)
+                    return;
+                if (destitaionMapChip.MapChipAttribute == (MapChipAttribute.None))
+                    return;
+                _DownStart = true;
+                _movestart = 0;
+            }
+        }
+        if (Input.GetKeyDown(_movedLeftKey) == true)
+        {
+            MapChip targetMapChip = mapData[mapChipIndex.x, mapChipIndex.y];
+            MapChip destitaionMapChip = mapData[mapChipIndex.x, mapChipIndex.y - 1];
+            // プレイヤーが現在いるマップチップと移動先のマップチップを比較する
+            if (targetMapChip.CanMovePlayer[Common.MoveLeft] == true && destitaionMapChip.CanMovePlayer[Common.MoveRight] == true)
+            {
+                _LeftStart = true;
+                _movestart = 0;
+            }
+        }
+        if (Input.GetKeyDown(_movedUpKey) == true)
+        {
+            MapChip targetMapChip = mapData[mapChipIndex.x, mapChipIndex.y];
+            MapChip destitaionMapChip = mapData[mapChipIndex.x - 1, mapChipIndex.y];
+            // プレイヤーが現在いるマップチップと移動先のマップチップを比較する
+            if (targetMapChip.CanMovePlayer[Common.MoveUp] == true && destitaionMapChip.CanMovePlayer[Common.MoveDown] == true)
+            {
+                _UpStart = true;
+                _movestart = 0;
             }
         }
     }
 
-    private void OnCollisionEnter2D(Collision2D other)
+    private void SetMapChipData(MapChip mapChip)
+    {
+        _mapChip = mapChip;
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
     {
         if (other.gameObject.CompareTag("Key"))
         {
             _GetKey = true;
+            _mapChip.RemoveKeyAttribute();
             _Keyimage.color = new Color(colorrock, colorrock, colorrock, colorrock);
             Destroy(other.gameObject);
         }
@@ -167,23 +150,21 @@ public class PlayerManager : MonoBehaviour
             _Keyimage.color = new Color(colorrock, colorrock, colorrock, 0.3f);
             Destroy(other.gameObject);
         }
-        if (other.gameObject.CompareTag("Lock") && _GetKey == false)
-        {
-            _UpStart = false;
-            _DownStart = false;
-            _LeftStart = false;
-            _RightStart = false;
-            _Up = false;
-            _Down = false;
-            _Left = false;
-            _Right = false;
-        }
     }
     private void OnCollisionStay2D(Collision2D other)
     {
         if (other.gameObject.CompareTag("Map"))
         {
             _mapSprite = other.gameObject.GetComponent<SpriteRenderer>();
+        }
+    }
+
+    private void LockMove(MapChip mapChip)
+    {
+        if (mapChip.MapChipAttribute == (MapChipAttribute.Use | MapChipAttribute.Lock))
+        {
+            _DownStart = true;
+            _movestart = 0;
         }
     }
 }
