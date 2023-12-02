@@ -100,12 +100,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _Keyimage: {fileID: 0}
-  _playerMoveMax: 100
+  _playerMoveMax: 50
   _movestartMax: 100
-  _Up: 0
-  _Down: 0
-  _Left: 0
-  _Right: 0
   _UpStart: 0
   _DownStart: 0
   _LeftStart: 0
@@ -120,7 +116,7 @@ CapsuleCollider2D:
   m_Enabled: 1
   m_Density: 1
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
