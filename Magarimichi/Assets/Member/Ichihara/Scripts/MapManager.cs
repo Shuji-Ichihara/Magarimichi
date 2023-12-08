@@ -6,6 +6,8 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
 {
     [SerializeField]
     private Button _button;
+    [SerializeField]
+    private UnityEngine.UI.Button _resetButton = null;
     #region Refarences
     // 配置するマップチップ
     [SerializeField]
@@ -64,6 +66,7 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
     private Material _defaultMaterial = null;
     // ゴールのテスト用フラグ
     private bool _isReachedGoal = false;
+    private bool _isResetButton = false;
     #endregion
 
     new private void Awake()
@@ -89,14 +92,26 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
             GameObject obj = Resources.Load("Prefabs/Lock") as GameObject;
             _lock = obj;
         }
+        if (_resetButton == null)
+        {
+            GameObject obj = GameObject.Find("ResetButton") as GameObject;
+            _resetButton = obj.GetComponent<UnityEngine.UI.Button>();
+        }
         // マップ配列の大きさを設定
         _map = new MapChip[_mapWidthAndHeight.y, _mapWidthAndHeight.x];
         GenerateMap();
         GenerateObject();
     }
 
+    private void Start()
+    {
+        SoundManager.instance.BGMPause();
+        SoundManager.instance.PlayBGM(SoundManager.E_BGM.InGameBGM);
+    }
+
     private void Update()
     {
+        _isResetButton = false;
         MoveMapChip();
         GoalCheck();
         // TODO: プレイヤー側で定義したフラグを使用する
@@ -106,6 +121,34 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
             _button.Noumber = 3;
             _button.SceneMoving();
         }
+        _resetButton.onClick.AddListener(
+            delegate
+            {
+                if(_isResetButton == false)
+                {
+                    ResetMap();
+                    if (_key == null)
+                    {
+                        GameObject obj = Resources.Load("Prefabs/Key") as GameObject;
+                        _key = obj;
+                    }
+                    if (_lock == null)
+                    {
+                        GameObject obj = Resources.Load("Prefabs/Lock") as GameObject;
+                        _lock = obj;
+                    }
+                    GenerateMap();
+                    GenerateObject();
+                    var player = _player.GetComponent<PlayerManager>();
+                    player.enabled = true;
+                    player.DisableKey();
+                    player.SetKeyImageColor(new Color(1.0f, 1.0f, 1.0f, 0.3f));
+                    _player.GetComponent<CapsuleCollider2D>().enabled = true;
+                    _key.GetComponent<CapsuleCollider2D>().enabled = true;
+                    _lock.GetComponent<BoxCollider2D>().enabled = true;
+                    _isResetButton = true;
+                }
+            });
     }
 
     /// <summary>
@@ -179,6 +222,7 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
             // _targetMapChip が null ならばマテリアルを設定しない
             if (_targetMapChip == null)
                 return;
+            SoundManager.instance.PlaySE(SoundManager.E_SE.ChooseMapChip);
             _targetMapChip.SetMapChipMaterial(_activeMaterial);
         }
         if (Input.GetMouseButtonUp(0) == true)
@@ -201,6 +245,7 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
                 if (_player.transform.position.y >= _targetMapChip.transform.position.y - _player.transform.localScale.y / half
                     && _player.transform.position.y <= _targetMapChip.transform.position.y + _player.transform.localScale.y / half)
                 {
+                    SoundManager.instance.PlaySE(SoundManager.E_SE.Cancel);
                     _targetMapChip.SetMapChipMaterial(_defaultMaterial);
                     return;
                 }
@@ -214,13 +259,23 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
         {
             // いずれかのマップチップの情報が null ならば移動しない
             if (_targetMapChip == null || _destinationMapChip == null)
+            {
+                SoundManager.instance.PlaySE(SoundManager.E_SE.Cancel);
                 return;
+            }
+            // 移動前と移動後のマップチップの情報が同じならば移動しない
+            if (_targetMapChip == _destinationMapChip)
+            {
+                SoundManager.instance.PlaySE(SoundManager.E_SE.Cancel);
+                return;
+            }
             // _targetMapChip と NoneMapChip のインデックスを取得
             var indexNoneMapChip = _map.GetIndex(_noneMapChip);
             var indexTargetMapChip = _map.GetIndex(_targetMapChip);
             // 斜めの移動を行わない
             if ((indexTargetMapChip.x == indexNoneMapChip.x || indexTargetMapChip.y == indexNoneMapChip.y) == false)
             {
+                SoundManager.instance.PlaySE(SoundManager.E_SE.Cancel);
                 _targetMapChip.SetMapChipMaterial(_defaultMaterial);
                 return;
             }
@@ -228,23 +283,27 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
             if ((indexTargetMapChip.x == indexNoneMapChip.x - 1 || indexTargetMapChip.x == indexNoneMapChip.x + 1
                 || indexTargetMapChip.y == indexNoneMapChip.y - 1 || indexTargetMapChip.y == indexNoneMapChip.y + 1) == false)
             {
+                SoundManager.instance.PlaySE(SoundManager.E_SE.Cancel);
                 _targetMapChip.SetMapChipMaterial(_defaultMaterial);
                 return;
             }
             // スタート、ゴール、鍵、錠前があるマップチップ、空白のマップチップは移動しない
             if (_targetMapChip.MapChipAttribute != MapChipAttribute.Use)
             {
+                SoundManager.instance.PlaySE(SoundManager.E_SE.Cancel);
                 _targetMapChip.SetMapChipMaterial(_defaultMaterial);
                 return;
             }
             // スライドパズルである為、空白以外には移動しない
             if (_destinationMapChip.MapChipAttribute != MapChipAttribute.None)
             {
+                SoundManager.instance.PlaySE(SoundManager.E_SE.Cancel);
                 _targetMapChip.SetMapChipMaterial(_defaultMaterial);
                 return;
             }
             // マップチップを移動させる
             ChangeMapChip(ref _targetMapChip, ref _destinationMapChip);
+            SoundManager.instance.PlaySE(SoundManager.E_SE.ReleaseMapChip);
             _targetMapChip.SetMapChipMaterial(_defaultMaterial);
         }
     }
@@ -291,6 +350,20 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
                 _isReachedGoal = true;
     }
 
+    private void ResetMap()
+    {
+        Destroy(_player);
+        Destroy(_key);
+        Destroy(_lock);
+        for (int heightMapChipCount = 0; heightMapChipCount < _mapWidthAndHeight.y; heightMapChipCount++)
+        {
+            for (int widthMapChipCount = 0; widthMapChipCount < _mapWidthAndHeight.x; widthMapChipCount++)
+            {
+                Destroy(_map[heightMapChipCount, widthMapChipCount].gameObject);
+            }
+        }
+    }
+
     #region Setter
     /// <summary>
     /// None 属性のマップチップの情報を格納
@@ -334,8 +407,8 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
     /// <summary>
     /// 配列の中のマップチップの情報をワールド座標から取得
     /// </summary>
-    /// <param name="xPosition">指定したマップチップの X 座標</param>
-    /// <param name="yPosition">指定したマップチップの Y 座標</param>
+    /// <param name="xPosition">取得したいマップチップの X 座標</param>
+    /// <param name="yPosition">取得したいマップチップの Y 座標</param>
     /// <returns>マップチップの情報</returns>
     public MapChip GetMapChipData(float xPosition, float yPosition)
     {
