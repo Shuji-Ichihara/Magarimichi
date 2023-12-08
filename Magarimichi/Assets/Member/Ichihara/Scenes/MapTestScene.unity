@@ -251,6 +251,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e5eae2e3b3a30594ba57078bee859d0c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _button: {fileID: 0}
   _mapChip: {fileID: 5621063505436132772, guid: 25a8ec29d34985b4484d6ed3086d3e1a, type: 3}
   _player: {fileID: 782033215564306724, guid: 4bf3c8382cd2f26499928249b72f2843, type: 3}
   _key: {fileID: 6185063958907375800, guid: 63d1c793acf5b4146a6720332e9f079f, type: 3}
