@@ -1,4 +1,4 @@
-using System.Collections;
+Ôªøusing System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -25,6 +25,8 @@ public class PlayerManager : MonoBehaviour
     public bool _RightStart;
     private bool _GetKey;
 
+    private bool _isMove = false;
+
     private void Start()
     {
         _Keyimage = GameObject.Find("Key").GetComponent<Image>();
@@ -33,6 +35,7 @@ public class PlayerManager : MonoBehaviour
 
     private void FixedUpdate()
     {
+        /*
         if (_UpStart)
         {
             _playerMove++;
@@ -57,7 +60,9 @@ public class PlayerManager : MonoBehaviour
             direction = -1;
             this.transform.position = new Vector3(this.transform.position.x + MoveSpeed * Time.fixedDeltaTime * direction, this.transform.position.y, this.transform.position.z);
         }
+        */
     }
+
     void Update()
     {
         MapChip mapChipData = MapManager.Instance.GetMapChipData(transform.position.x, transform.position.y);
@@ -67,73 +72,110 @@ public class PlayerManager : MonoBehaviour
             return;
         var mapData = MapManager.Instance.Map;
         Vector2Int mapChipIndex = mapData.GetIndex(_mapChip);
+        /*
         _movestart++;
-        if (_playerMoveMax <= _playerMove)
+        if (_playerMoveMax < _playerMove)
         {
             _UpStart = false;
             _DownStart = false;
             _LeftStart = false;
-            _RightStart = false;
+            _RightStart = false; 
+            _isMove = false;
             _playerMove = 0;
         }
-        if (Input.GetKeyDown(_movedRightKey) == true)
+        */
+
+        if (_isMove == false)
         {
-            MapChip targetMapChip = mapData[mapChipIndex.x, mapChipIndex.y];
-            MapChip destitaionMapChip = mapData[mapChipIndex.x, mapChipIndex.y + 1];
-            // ÉvÉåÉCÉÑÅ[Ç™åªç›Ç¢ÇÈÉ}ÉbÉvÉ`ÉbÉvÇ∆à⁄ìÆêÊÇÃÉ}ÉbÉvÉ`ÉbÉvÇî‰ärÇ∑ÇÈ
-            if (targetMapChip.CanMovePlayer[Common.MoveRight] == true && destitaionMapChip.CanMovePlayer[Common.MoveLeft] == true)
+            if (Input.GetKeyDown(_movedRightKey) == true)
             {
-                if (destitaionMapChip.MapChipAttribute == (MapChipAttribute.Use | MapChipAttribute.Lock) && _GetKey == false)
-                    return;
-                if (destitaionMapChip.MapChipAttribute == (MapChipAttribute.None))
-                    return;
-                _RightStart = true;
-                _movestart = 0;
+                MapChip targetMapChip = mapData[mapChipIndex.x, mapChipIndex.y];
+                MapChip destitaionMapChip = mapData[mapChipIndex.x, mapChipIndex.y + 1];
+                // „Éó„É¨„Ç§„É§„Éº„ÅåÁèæÂú®„ÅÑ„Çã„Éû„ÉÉ„Éó„ÉÅ„ÉÉ„Éó„Å®ÁßªÂãïÂÖà„ÅÆ„Éû„ÉÉ„Éó„ÉÅ„ÉÉ„Éó„ÇíÊØîËºÉ„Åô„Çã
+                if (targetMapChip.CanMovePlayer[Common.MoveRight] == true && destitaionMapChip.CanMovePlayer[Common.MoveLeft] == true)
+                {
+                    if (destitaionMapChip.MapChipAttribute == (MapChipAttribute.Use | MapChipAttribute.Lock) && _GetKey == false)
+                    {
+                        SoundManager.instance.PlaySE(SoundManager.E_SE.Cancel);
+                        return;
+                    }
+                    if (destitaionMapChip.MapChipAttribute == (MapChipAttribute.None))
+                        return;
+                    //_RightStart = true;
+                    //_movestart = 0;
+                    _isMove = true;
+                    StartCoroutine(MovePlayerCoroutine(Vector3.right));
+                }
+            }
+            if (Input.GetKeyDown(_movedDownKey) == true)
+            {
+                MapChip targetMapChip = mapData[mapChipIndex.x, mapChipIndex.y];
+                MapChip destitaionMapChip = mapData[mapChipIndex.x + 1, mapChipIndex.y];
+                // „Éó„É¨„Ç§„É§„Éº„ÅåÁèæÂú®„ÅÑ„Çã„Éû„ÉÉ„Éó„ÉÅ„ÉÉ„Éó„Å®ÁßªÂãïÂÖà„ÅÆ„Éû„ÉÉ„Éó„ÉÅ„ÉÉ„Éó„ÇíÊØîËºÉ„Åô„Çã
+                if (targetMapChip.CanMovePlayer[Common.MoveDown] == true && destitaionMapChip.CanMovePlayer[Common.MoveUp] == true)
+                {
+                    if (destitaionMapChip.MapChipAttribute == (MapChipAttribute.Use | MapChipAttribute.Lock) && _GetKey == false)
+                    {
+                        SoundManager.instance.PlaySE(SoundManager.E_SE.Cancel);
+                        return;
+                    }
+                    if (destitaionMapChip.MapChipAttribute == (MapChipAttribute.None))
+                        return;
+                    //_DownStart = true;
+                    //_movestart = 0;
+                    _isMove = true;
+                    StartCoroutine(MovePlayerCoroutine(Vector3.down));
+                }
+            }
+            if (Input.GetKeyDown(_movedLeftKey) == true)
+            {
+                MapChip targetMapChip = mapData[mapChipIndex.x, mapChipIndex.y];
+                MapChip destitaionMapChip = mapData[mapChipIndex.x, mapChipIndex.y - 1];
+                // „Éó„É¨„Ç§„É§„Éº„ÅåÁèæÂú®„ÅÑ„Çã„Éû„ÉÉ„Éó„ÉÅ„ÉÉ„Éó„Å®ÁßªÂãïÂÖà„ÅÆ„Éû„ÉÉ„Éó„ÉÅ„ÉÉ„Éó„ÇíÊØîËºÉ„Åô„Çã
+                if (targetMapChip.CanMovePlayer[Common.MoveLeft] == true && destitaionMapChip.CanMovePlayer[Common.MoveRight] == true)
+                {
+                    if (destitaionMapChip.MapChipAttribute == (MapChipAttribute.None))
+                        return;
+                    //_LeftStart = true;
+                    //_movestart = 0;
+                    _isMove = true;
+                    StartCoroutine(MovePlayerCoroutine(Vector3.left));
+                }
+            }
+            if (Input.GetKeyDown(_movedUpKey) == true)
+            {
+                MapChip targetMapChip = mapData[mapChipIndex.x, mapChipIndex.y];
+                MapChip destitaionMapChip = mapData[mapChipIndex.x - 1, mapChipIndex.y];
+                // „Éó„É¨„Ç§„É§„Éº„ÅåÁèæÂú®„ÅÑ„Çã„Éû„ÉÉ„Éó„ÉÅ„ÉÉ„Éó„Å®ÁßªÂãïÂÖà„ÅÆ„Éû„ÉÉ„Éó„ÉÅ„ÉÉ„Éó„ÇíÊØîËºÉ„Åô„Çã
+                if (targetMapChip.CanMovePlayer[Common.MoveUp] == true && destitaionMapChip.CanMovePlayer[Common.MoveDown] == true)
+                {
+                    if (destitaionMapChip.MapChipAttribute == (MapChipAttribute.None))
+                        return;
+                    //_UpStart = true;
+                    //_movestart = 0;
+                    _isMove = true;
+                    StartCoroutine(MovePlayerCoroutine(Vector3.up));
+                }
             }
         }
-        if (Input.GetKeyDown(_movedDownKey) == true)
-        {
-            MapChip targetMapChip = mapData[mapChipIndex.x, mapChipIndex.y];
-            MapChip destitaionMapChip = mapData[mapChipIndex.x + 1, mapChipIndex.y];
-            // ÉvÉåÉCÉÑÅ[Ç™åªç›Ç¢ÇÈÉ}ÉbÉvÉ`ÉbÉvÇ∆à⁄ìÆêÊÇÃÉ}ÉbÉvÉ`ÉbÉvÇî‰ärÇ∑ÇÈ
-            if (targetMapChip.CanMovePlayer[Common.MoveDown] == true && destitaionMapChip.CanMovePlayer[Common.MoveUp] == true)
-            {
-                if (destitaionMapChip.MapChipAttribute == (MapChipAttribute.Use | MapChipAttribute.Lock) && _GetKey == false)
-                    return;
-                if (destitaionMapChip.MapChipAttribute == (MapChipAttribute.None))
-                    return;
-                _DownStart = true;
-                _movestart = 0;
-            }
-        }
-        if (Input.GetKeyDown(_movedLeftKey) == true)
-        {
-            MapChip targetMapChip = mapData[mapChipIndex.x, mapChipIndex.y];
-            MapChip destitaionMapChip = mapData[mapChipIndex.x, mapChipIndex.y - 1];
-            // ÉvÉåÉCÉÑÅ[Ç™åªç›Ç¢ÇÈÉ}ÉbÉvÉ`ÉbÉvÇ∆à⁄ìÆêÊÇÃÉ}ÉbÉvÉ`ÉbÉvÇî‰ärÇ∑ÇÈ
-            if (targetMapChip.CanMovePlayer[Common.MoveLeft] == true && destitaionMapChip.CanMovePlayer[Common.MoveRight] == true)
-            {
-                _LeftStart = true;
-                _movestart = 0;
-            }
-        }
-        if (Input.GetKeyDown(_movedUpKey) == true)
-        {
-            MapChip targetMapChip = mapData[mapChipIndex.x, mapChipIndex.y];
-            MapChip destitaionMapChip = mapData[mapChipIndex.x - 1, mapChipIndex.y];
-            // ÉvÉåÉCÉÑÅ[Ç™åªç›Ç¢ÇÈÉ}ÉbÉvÉ`ÉbÉvÇ∆à⁄ìÆêÊÇÃÉ}ÉbÉvÉ`ÉbÉvÇî‰ärÇ∑ÇÈ
-            if (targetMapChip.CanMovePlayer[Common.MoveUp] == true && destitaionMapChip.CanMovePlayer[Common.MoveDown] == true)
-            {
-                _UpStart = true;
-                _movestart = 0;
-            }
-        }
+    }
+
+    #region Setter
+    public void DisableKey()
+    {
+        _GetKey = false;
+    }
+
+    public void SetKeyImageColor(Color color)
+    {
+        _Keyimage.color = color;
     }
 
     private void SetMapChipData(MapChip mapChip)
     {
         _mapChip = mapChip;
     }
+    #endregion
 
     private void OnTriggerEnter2D(Collider2D other)
     {
@@ -142,12 +184,14 @@ public class PlayerManager : MonoBehaviour
             _GetKey = true;
             _mapChip.RemoveKeyAttribute();
             _Keyimage.color = new Color(colorrock, colorrock, colorrock, colorrock);
+            SoundManager.instance.PlaySE(SoundManager.E_SE.GetKey);
             Destroy(other.gameObject);
         }
         if (other.gameObject.CompareTag("Lock") && _GetKey == true)
         {
             _GetKey = false;
             _Keyimage.color = new Color(colorrock, colorrock, colorrock, 0.3f);
+            SoundManager.instance.PlaySE(SoundManager.E_SE.GetKey);
             Destroy(other.gameObject);
         }
     }
@@ -165,6 +209,52 @@ public class PlayerManager : MonoBehaviour
         {
             _DownStart = true;
             _movestart = 0;
+        }
+    }
+
+    /// <summary>
+    /// 1„Éó„É¨„Ç§„É§„Éº„ÅÆÁßªÂãï„É´„Éº„ÉÅ„É≥
+    /// </summary>
+    /// <param name="direction">ÁßªÂãïÊñπÂêë</param>
+    /// <param name="waitForSecends">ÂæÖÊ©üÊôÇÈñì</param>
+    /// <returns></returns>
+    private IEnumerator MovePlayerCoroutine(Vector3 direction, float waitForSecends = 0.5f)
+    {
+        float movePlayerDistance = 0.0f;
+        if (direction == Vector3.up || direction == Vector3.down)
+        {
+            while (_isMove == true)
+            {
+                if (movePlayerDistance >= _mapChip.gameObject.transform.localScale.y / 2)
+                {
+                    var mapChip = MapManager.Instance.GetMapChipData(transform.position.x, transform.position.y);
+                    transform.position = mapChip.transform.position;
+                    _isMove = false;
+                    continue;
+                }
+                yield return new WaitForSeconds(waitForSecends);
+                SoundManager.instance.PlaySE(SoundManager.E_SE.MovePlayer);
+                transform.position += direction * _mapChip.gameObject.transform.localScale.y *  waitForSecends;
+                movePlayerDistance += waitForSecends;
+
+            }
+        }
+        else if (direction == Vector3.right || direction == Vector3.left)
+        {
+            while (_isMove == true)
+            {
+                if (movePlayerDistance >= _mapChip.gameObject.transform.localScale.x / 2)
+                {
+                    var mapChip = MapManager.Instance.GetMapChipData(transform.position.x, transform.position.y);
+                    transform.position = mapChip.transform.position;
+                    _isMove = false;
+                    continue;
+                }
+                yield return new WaitForSeconds(waitForSecends);
+                SoundManager.instance.PlaySE(SoundManager.E_SE.MovePlayer);
+                transform.position += direction * _mapChip.gameObject.transform.localScale.x *  waitForSecends;
+                movePlayerDistance += waitForSecends;
+            }
         }
     }
 }
