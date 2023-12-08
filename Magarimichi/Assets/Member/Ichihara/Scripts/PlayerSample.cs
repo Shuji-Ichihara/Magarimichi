@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D))]
 public class PlayerSample : MonoBehaviour
@@ -12,6 +13,11 @@ public class PlayerSample : MonoBehaviour
     private readonly KeyCode _movedRightKey = KeyCode.D;
 
     private Rigidbody2D _rb2d = null;
+
+    #region Other
+    private bool _havekey = false;
+    private bool _isMoveEnd = false;
+    #endregion
 
     // Start is called before the first frame update
     void Start()
@@ -45,38 +51,54 @@ public class PlayerSample : MonoBehaviour
         Vector2Int mapChipIndex = mapData.GetIndex(mapChip);
         try
         {
-            // 入力したキーに応じて、プレイヤーを隣接しているマップチップに移動
-            if (Input.GetKeyDown(_movedUpKey) == true)
+            if (_isMoveEnd == false)
             {
-                MapChip targetMapChip = mapData[mapChipIndex.x, mapChipIndex.y];
-                MapChip destitaionMapChip = mapData[mapChipIndex.x - 1, mapChipIndex.y];
-                // プレイヤーが現在いるマップチップと移動先のマップチップを比較する
-                if (targetMapChip.CanMovePlayer[Common.MoveUp] == true && destitaionMapChip.CanMovePlayer[Common.MoveDown] == true)
-                    transform.position += Vector3.up * mapChip.transform.localScale.y;
-            }
-            else if (Input.GetKeyDown(_movedDownKey) == true)
-            {
-                MapChip targetMapChip = mapData[mapChipIndex.x, mapChipIndex.y];
-                MapChip destitaionMapChip = mapData[mapChipIndex.x + 1, mapChipIndex.y];
-                // プレイヤーが現在いるマップチップと移動先のマップチップを比較する
-                if (targetMapChip.CanMovePlayer[Common.MoveDown] == true && destitaionMapChip.CanMovePlayer[Common.MoveUp] == true)
-                    transform.position += Vector3.down * mapChip.transform.localScale.y;
-            }
-            else if (Input.GetKeyDown(_movedLeftKey) == true)
-            {
-                MapChip targetMapChip = mapData[mapChipIndex.x, mapChipIndex.y];
-                MapChip destitaionMapChip = mapData[mapChipIndex.x, mapChipIndex.y - 1];
-                // プレイヤーが現在いるマップチップと移動先のマップチップを比較する
-                if (targetMapChip.CanMovePlayer[Common.MoveLeft] == true && destitaionMapChip.CanMovePlayer[Common.MoveRight] == true)
-                    transform.position += Vector3.left * mapChip.transform.localScale.x;
-            }
-            else if (Input.GetKeyDown(_movedRightKey) == true)
-            {
-                MapChip targetMapChip = mapData[mapChipIndex.x, mapChipIndex.y];
-                MapChip destitaionMapChip = mapData[mapChipIndex.x, mapChipIndex.y + 1];
-                // プレイヤーが現在いるマップチップと移動先のマップチップを比較する
-                if (targetMapChip.CanMovePlayer[Common.MoveRight] == true && destitaionMapChip.CanMovePlayer[Common.MoveLeft] == true)
-                    transform.position += Vector3.right * mapChip.transform.localScale.x;
+                // 入力したキーに応じて、プレイヤーを隣接しているマップチップに移動
+                if (Input.GetKeyDown(_movedUpKey) == true)
+                {
+                    MapChip targetMapChip = mapData[mapChipIndex.x, mapChipIndex.y];
+                    MapChip destitaionMapChip = mapData[mapChipIndex.x - 1, mapChipIndex.y];
+                    // プレイヤーが現在いるマップチップと移動先のマップチップを比較する
+                    if (targetMapChip.CanMovePlayer[Common.MoveUp] == true && destitaionMapChip.CanMovePlayer[Common.MoveDown] == true)
+                    {
+                        _isMoveEnd = true;
+                        StartCoroutine(MovePlayerCoroutine(Vector3.up));
+
+                    }
+                }
+                else if (Input.GetKeyDown(_movedDownKey) == true)
+                {
+                    MapChip targetMapChip = mapData[mapChipIndex.x, mapChipIndex.y];
+                    MapChip destitaionMapChip = mapData[mapChipIndex.x + 1, mapChipIndex.y];
+                    // プレイヤーが現在いるマップチップと移動先のマップチップを比較する
+                    if (targetMapChip.CanMovePlayer[Common.MoveDown] == true && destitaionMapChip.CanMovePlayer[Common.MoveUp] == true)
+                    {
+                        _isMoveEnd = true;
+                        StartCoroutine(MovePlayerCoroutine(Vector3.down));
+                    }
+                }
+                else if (Input.GetKeyDown(_movedLeftKey) == true)
+                {
+                    MapChip targetMapChip = mapData[mapChipIndex.x, mapChipIndex.y];
+                    MapChip destitaionMapChip = mapData[mapChipIndex.x, mapChipIndex.y - 1];
+                    // プレイヤーが現在いるマップチップと移動先のマップチップを比較する
+                    if (targetMapChip.CanMovePlayer[Common.MoveLeft] == true && destitaionMapChip.CanMovePlayer[Common.MoveRight] == true)
+                    {
+                        _isMoveEnd = true;
+                        StartCoroutine(MovePlayerCoroutine(Vector3.left));
+                    }
+                }
+                else if (Input.GetKeyDown(_movedRightKey) == true)
+                {
+                    MapChip targetMapChip = mapData[mapChipIndex.x, mapChipIndex.y];
+                    MapChip destitaionMapChip = mapData[mapChipIndex.x, mapChipIndex.y + 1];
+                    // プレイヤーが現在いるマップチップと移動先のマップチップを比較する
+                    if (targetMapChip.CanMovePlayer[Common.MoveRight] == true && destitaionMapChip.CanMovePlayer[Common.MoveLeft] == true)
+                    {
+                        _isMoveEnd = true;
+                        StartCoroutine(MovePlayerCoroutine(Vector3.right));
+                    }
+                }
             }
         }
         catch (System.IndexOutOfRangeException)
@@ -110,5 +132,33 @@ public class PlayerSample : MonoBehaviour
         // 錠前を開錠
         if (other.name == MapManager.Instance.GetLockData().name)
             other.gameObject.SetActive(false);
+    }
+
+
+    private IEnumerator MovePlayerCoroutine(Vector3 direction)
+    {
+        float movePlayerDistance = 0.0f;
+        if (direction == Vector3.up || direction == Vector3.down)
+        {
+            while (_isMoveEnd == true)
+            {
+                if (movePlayerDistance > _mapChip.gameObject.transform.localScale.y / 2)
+                    _isMoveEnd = false;
+                yield return null;
+                transform.position += direction * _mapChip.gameObject.transform.localScale.y * Time.deltaTime;
+                movePlayerDistance += Time.deltaTime;
+            }
+        }
+        else if (direction == Vector3.right || direction == Vector3.left)
+        {
+            while (_isMoveEnd == true)
+            {
+                if (movePlayerDistance > _mapChip.gameObject.transform.localScale.x / 2)
+                    _isMoveEnd = false;
+                yield return null;
+                transform.position += direction * _mapChip.gameObject.transform.localScale.x * Time.deltaTime;
+                movePlayerDistance += Time.deltaTime;
+            }
+        }
     }
 }
