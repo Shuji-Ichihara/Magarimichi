@@ -570,6 +570,7 @@ MonoBehaviour:
   _key: {fileID: 6185063958907375800, guid: 63d1c793acf5b4146a6720332e9f079f, type: 3}
   _lock: {fileID: 4970301201484273161, guid: 0c3352b5c61c8dd4e8ee2963f14fc046, type: 3}
   _button: {fileID: 853541409}
+  _house: {fileID: 0}
   _resetButton: {fileID: 0}
   _mapChipSprites:
   - {fileID: 21300000, guid: 4d9213e489c6c3446b3d6ed95d750eb0, type: 3}
