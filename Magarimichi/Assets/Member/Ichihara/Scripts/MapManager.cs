@@ -19,6 +19,9 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
     private GameObject _lock = null;
     [SerializeField]
     private Button _button;
+    //
+    [SerializeField]
+    private GameObject _house = null;
     [SerializeField]
     private UnityEngine.UI.Button _resetButton = null;
     #endregion
@@ -92,7 +95,12 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
             GameObject obj = Resources.Load("Prefabs/Lock") as GameObject;
             _lock = obj;
         }
-        if(_button == null)
+        if(_house == null)
+        {
+            GameObject obj = Resources.Load("Prefabs/House") as GameObject;
+            _house = obj;
+        }
+        if (_button == null)
         {
             GameObject obj = GameObject.Find("Button");
             _button = obj.GetComponent<Button>();
@@ -200,7 +208,9 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
     /// </summary>
     private void GenerateObject()
     {
-        Vector2Int keySpawnPosition = new Vector2Int(), lockSpawnPosition = new Vector2Int();
+        Vector2Int keySpawnPosition = new Vector2Int(),
+                   lockSpawnPosition = new Vector2Int(), 
+                   houseSpawnPosition = new Vector2Int();
         bool isGeneratedKey = false;
         // _map[1,1] の座標に鍵が生成されないようにする
         // ゲームの詰み防止
@@ -215,10 +225,13 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
         }
         // 錠前が生成されるマップチップのインデックス
         lockSpawnPosition = new Vector2Int(_mapWidthAndHeight.x - 1, _mapWidthAndHeight.y - 2);
+        //
+        houseSpawnPosition = new Vector2Int(_mapWidthAndHeight.x - 1, MapChipWidthAndHeight.y - 1);
         // 生成
         _player = Instantiate(_player, _map[0, 0].transform.position, Quaternion.identity);
         _key = Instantiate(_key, _map[keySpawnPosition.y, keySpawnPosition.x].transform.position, Quaternion.identity);
         _lock = Instantiate(_lock, _map[lockSpawnPosition.y, lockSpawnPosition.x].transform.position, Quaternion.identity);
+        _house = Instantiate(_house, _map[houseSpawnPosition.y, houseSpawnPosition.x].transform.position, Quaternion.identity);
     }
 
     /// <summary>
