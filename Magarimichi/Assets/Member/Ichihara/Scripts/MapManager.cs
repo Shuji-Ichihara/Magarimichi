@@ -4,10 +4,6 @@ using Random = UnityEngine.Random;
 
 public class MapManager : SingletonMonoBehaviour<MapManager>
 {
-    [SerializeField]
-    private Button _button;
-    [SerializeField]
-    private UnityEngine.UI.Button _resetButton = null;
     #region Refarences
     // 配置するマップチップ
     [SerializeField]
@@ -21,6 +17,10 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
     // 錠前オブジェくト
     [SerializeField]
     private GameObject _lock = null;
+    [SerializeField]
+    private Button _button;
+    [SerializeField]
+    private UnityEngine.UI.Button _resetButton = null;
     #endregion
     #region Sprites
     // マップチップに設定するスプライトの配列
@@ -92,9 +92,14 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
             GameObject obj = Resources.Load("Prefabs/Lock") as GameObject;
             _lock = obj;
         }
+        if(_button == null)
+        {
+            GameObject obj = GameObject.Find("Button");
+            _button = obj.GetComponent<Button>();
+        }
         if (_resetButton == null)
         {
-            GameObject obj = GameObject.Find("ResetButton") as GameObject;
+            GameObject obj = GameObject.Find("ResetButton");
             _resetButton = obj.GetComponent<UnityEngine.UI.Button>();
         }
         // マップ配列の大きさを設定
@@ -114,19 +119,18 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
         _isResetButton = false;
         MoveMapChip();
         GoalCheck();
-        // TODO: プレイヤー側で定義したフラグを使用する
         if (_isReachedGoal == true)
         {
-            // TODO: ゴール時の処理を記述する
             _button.Noumber = 3;
             _button.SceneMoving();
         }
+        // 「やり直し」ボタンを押した時の処理
         _resetButton.onClick.AddListener(
             delegate
             {
                 if(_isResetButton == false)
                 {
-                    ResetMap();
+                    DeleteMap();
                     if (_key == null)
                     {
                         GameObject obj = Resources.Load("Prefabs/Key") as GameObject;
@@ -137,8 +141,10 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
                         GameObject obj = Resources.Load("Prefabs/Lock") as GameObject;
                         _lock = obj;
                     }
+                    // マップ再生成
                     GenerateMap();
                     GenerateObject();
+                    // プレイヤーのステータスをリセット
                     var player = _player.GetComponent<PlayerManager>();
                     player.enabled = true;
                     player.DisableKey();
@@ -194,11 +200,21 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
     /// </summary>
     private void GenerateObject()
     {
-        // 鍵が生成されるマップチップの座標
-        Vector2Int keySpawnPosition = new Vector2Int(
-            Random.Range(1, _mapWidthAndHeight.x - 1), Random.Range(1, _mapWidthAndHeight.y - 1));
-        // 錠前が生成されるマップチップの座標
-        Vector2Int lockSpawnPosition = new Vector2Int(_mapWidthAndHeight.x - 1, _mapWidthAndHeight.y - 2);
+        Vector2Int keySpawnPosition = new Vector2Int(), lockSpawnPosition = new Vector2Int();
+        bool isGeneratedKey = false;
+        // _map[1,1] の座標に鍵が生成されないようにする
+        // ゲームの詰み防止
+        while(isGeneratedKey == false)
+        {
+            // 鍵が生成されるマップチップのインデックス
+            keySpawnPosition = new Vector2Int(
+                Random.Range(1, _mapWidthAndHeight.x - 1), Random.Range(1, _mapWidthAndHeight.y - 1));
+            if (keySpawnPosition.x == 1 && keySpawnPosition.y == 1)
+                continue;
+            isGeneratedKey = true;
+        }
+        // 錠前が生成されるマップチップのインデックス
+        lockSpawnPosition = new Vector2Int(_mapWidthAndHeight.x - 1, _mapWidthAndHeight.y - 2);
         // 生成
         _player = Instantiate(_player, _map[0, 0].transform.position, Quaternion.identity);
         _key = Instantiate(_key, _map[keySpawnPosition.y, keySpawnPosition.x].transform.position, Quaternion.identity);
@@ -323,10 +339,10 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
             {
                 // 配列の要素を上書き
                 // これをしないとインデックスを取得する時におかしな値になる
-                if (_map[widthMapChipCount, heightMapChipCount] == targetMapChip)
-                    _map.SetValue(dummyDestinationMapChip, widthMapChipCount, heightMapChipCount);
-                else if (_map[widthMapChipCount, heightMapChipCount] == destinationMapChip)
-                    _map.SetValue(dummyTargetMapChip, widthMapChipCount, heightMapChipCount);
+                if (_map[heightMapChipCount, widthMapChipCount] == targetMapChip)
+                    _map.SetValue(dummyDestinationMapChip, heightMapChipCount, widthMapChipCount);
+                else if (_map[heightMapChipCount, widthMapChipCount] == destinationMapChip)
+                    _map.SetValue(dummyTargetMapChip, heightMapChipCount, widthMapChipCount);
             }
         }
         targetMapChip.transform.position = destinationPosition;
@@ -341,7 +357,7 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
         int half = 2;
         // プレイヤーの座標、ゴールのマップチップの座標
         Vector3 playerPosition = _player.transform.position,
-                mapChipPosition = _map[MapChipWidthAndHeight.x - 1, _mapWidthAndHeight.y - 1].transform.position;
+                mapChipPosition = _map[MapChipWidthAndHeight.y - 1, _mapWidthAndHeight.x - 1].transform.position;
         // プレイヤーオブジェクトのスケール
         float playerXScale = _player.transform.localScale.x, playerYScale = _player.transform.localScale.y;
         // プレイヤーの座標がゴールのマップチップの中心と重なったらゴールする
@@ -350,7 +366,10 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
                 _isReachedGoal = true;
     }
 
-    private void ResetMap()
+    /// <summary>
+    /// マップ削除
+    /// </summary>
+    private void DeleteMap()
     {
         Destroy(_player);
         Destroy(_key);
