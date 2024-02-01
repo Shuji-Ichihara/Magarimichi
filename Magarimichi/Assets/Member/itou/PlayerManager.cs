@@ -203,6 +203,7 @@ public class PlayerManager : MonoBehaviour
         }
     }
 
+    /*
     private void LockMove(MapChip mapChip)
     {
         if (mapChip.MapChipAttribute == (MapChipAttribute.Use | MapChipAttribute.Lock))
@@ -210,7 +211,7 @@ public class PlayerManager : MonoBehaviour
             _DownStart = true;
             _movestart = 0;
         }
-    }
+    }*/
 
     /// <summary>
     /// 1プレイヤーの移動ルーチン
